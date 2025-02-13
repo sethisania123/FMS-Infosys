@@ -14,7 +14,7 @@ enum Role: String, Codable {
     case maintenance = "Maintenance Personnel"
 }
 
-enum Experience: String, Codable {
+enum Experience: String, Codable, CaseIterable {
     case lessThanOne = "Less than 1 year"
     case lessThanFive = "Less than 5 years"
     case moreThanFive = "More than 5 years"
@@ -30,12 +30,12 @@ enum Experience: String, Codable {
     }
 }
 
-enum GeoPreference: String, Codable {
+enum GeoPreference: String, Codable, CaseIterable {
     case hilly = "Hilly Areas"
     case plain = "Plain Areas"
 }
 
-enum VehicleType: String, Codable {
+enum VehicleType: String, Codable, CaseIterable {
     case truck = "Truck"
     case van = "Van"
     case car = "Car"

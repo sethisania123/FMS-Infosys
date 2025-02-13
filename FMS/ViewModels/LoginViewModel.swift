@@ -79,7 +79,7 @@ class LoginViewModel: ObservableObject {
         
     }
     
-    func createDriverAccount(name: String, email: String, phone: String, experience: Experience,
+    func createDriverAccount(name: String, email: String, password: String, phone: String, experience: Experience,
                            license: String, geoPreference: GeoPreference, vehiclePreference: VehicleType) {
         isLoading = true
         errorMessage = nil

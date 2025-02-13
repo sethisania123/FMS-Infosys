@@ -205,7 +205,10 @@ struct TripCardView: View {
                     Text("Los Angeles, CA")
                 }
             }
-            Rectangle().frame(width: .infinity, height:1)
+            Rectangle()
+                .frame(maxWidth: .infinity)
+                .frame(height: 1)
+            
             
             // Departure and ETA
             HStack(spacing: 16) {
