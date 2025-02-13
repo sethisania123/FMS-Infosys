@@ -30,6 +30,9 @@ struct AddUserView: View {
     @State private var isFormValid = false
     @State private var isPasswordVisible: Bool = false
     
+    @State private var generatedPassword: String = ""
+    @State private var showPassword: Bool = false
+    
     let roles = ["Fleet Manager", "Driver", "Maintenance"]
     let experiences = ["1-2 years", "3-5 years", "5+ years"]
     let vehicleTypes = ["Truck", "Van", "Car"]
@@ -89,21 +92,7 @@ struct AddUserView: View {
                                                             .stroke(Color.gray, lineWidth: 1)
                                                     )
                             .frame(width:361)
-                    }
-                    Section(header: Text("Password").font(.headline).padding(.leading, -22)) {
                         
-                        SecureField("Enter password", text: $password)
-                            .padding(5)
-                            .background(Color.clear)
-                            .frame(height: 47)
-                            
-                            .listRowBackground(Color.clear)
-                            .overlay(
-                                                        RoundedRectangle(cornerRadius: 8)
-                                                            .stroke(Color.gray, lineWidth: 1)
-                                                    )
-                            .frame(width:361)
-                       
                     }
                     Section(header: Text("Contact Number").font(.headline).padding(.leading, -22)) {
                         
@@ -211,11 +200,21 @@ struct AddUserView: View {
 //        }
     }
     
+    
+    private func generateSecurePassword() -> String {
+        let length = 12
+        let characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*"
+        return String((0..<length).map { _ in characters.randomElement()! })
+    }
+    
     private func validateForm() {
-        isFormValid = !name.isEmpty && !email.isEmpty && !password.isEmpty && !contactNumber.isEmpty
-        if selectedRole == "Driver" {
-            isFormValid = isFormValid && !licenseNumber.isEmpty
-        }
+        let loginModel_t = LoginViewModel()
+        let password_t = generateSecurePassword()
+        
+        loginModel_t.createFleetManagerAccount(email: self.name, password: password_t, name: self.name, phone: contactNumber)
+        
+        print("Done")
+        
     }
 }
 
@@ -247,6 +246,8 @@ struct ImagePicker: UIViewControllerRepresentable {
         picker.delegate = context.coordinator
         return picker
     }
+    
+    
     
     func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
 }

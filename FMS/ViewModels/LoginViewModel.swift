@@ -13,30 +13,36 @@ class LoginViewModel: ObservableObject {
     private let auth = Auth.auth()
     private let db = Firestore.firestore()
     
-    // Check if any users exist in Firestore
-    func checkIfFirstUser() {
-        db.collection("users").getDocuments { [weak self] (snapshot, error) in
-            guard let self = self else { return }
-            
-            DispatchQueue.main.async {
-                if let error = error {
-                    self.errorMessage = error.localizedDescription
-                    self.showError = true
-                    return
-                }
-                
-                // If no users exist, set isFirstUser to true
-                self.isFirstUser = snapshot?.documents.isEmpty ?? true
-            }
-        }
+    init() {
+        checkIfFirstUser()
     }
     
-    // Sign in with email and password
+    func checkIfFirstUser() {
+        db.collection("users").whereField("role", isEqualTo: Role.fleet.rawValue)
+            .getDocuments { [weak self] snapshot, error in
+                DispatchQueue.main.async {
+                    if let error = error {
+                        self?.errorMessage = error.localizedDescription
+                        self?.showError = true
+                        return
+                    }
+                    self?.isFirstUser = snapshot?.isEmpty ?? true
+                }
+            }
+    }
+    
     func signIn(email: String, password: String) {
         isLoading = true
         errorMessage = nil
         
-        auth.signIn(withEmail: email, password: password) { [weak self] (authResult: AuthDataResult?, error: Error?) in
+        guard !email.isEmpty, !password.isEmpty else {
+            errorMessage = "Email and password are required"
+            showError = true
+            isLoading = false
+            return
+        }
+        
+        auth.signIn(withEmail: email, password: password) { [weak self] authResult, error in
             guard let self = self else { return }
             
             DispatchQueue.main.async {
@@ -59,12 +65,37 @@ class LoginViewModel: ObservableObject {
         }
     }
     
-    // Create a Fleet Manager account
     func createFleetManagerAccount(email: String, password: String, name: String, phone: String) {
         isLoading = true
         errorMessage = nil
         
-        auth.createUser(withEmail: email, password: password) { [weak self] (authResult, error) in
+        
+        let userDataDict = ["email": email, "name": name, "phone": phone, "role": Role.fleet.rawValue] as [String : Any]
+        let database = Firestore.firestore()
+        let newUserCollectionRef = database.collection("users").document(UUID().uuidString)
+        newUserCollectionRef.setData(userDataDict)
+        
+        self.isLoading = false
+        
+    }
+    
+    func createDriverAccount(name: String, email: String, phone: String, experience: Experience,
+                           license: String, geoPreference: GeoPreference, vehiclePreference: VehicleType) {
+        isLoading = true
+        errorMessage = nil
+        
+        // Input validation
+        guard !email.isEmpty, !name.isEmpty, !phone.isEmpty, !license.isEmpty else {
+            errorMessage = "All fields are required"
+            showError = true
+            isLoading = false
+            return
+        }
+        
+        // Generate a secure random password
+        let password = generateSecurePassword()
+        
+        auth.createUser(withEmail: email, password: password) { [weak self] authResult, error in
             guard let self = self else { return }
             
             DispatchQueue.main.async {
@@ -86,26 +117,47 @@ class LoginViewModel: ObservableObject {
                     "name": name,
                     "email": email,
                     "phone": phone,
-                    "role": Role.fleet.rawValue
+                    "role": Role.driver.rawValue,
+                    "createdAt": Timestamp()
                 ]
                 
-                self.db.collection("users").document(userId).setData(userData) { error in
-                    if let error = error {
-                        self.errorMessage = error.localizedDescription
-                        self.showError = true
-                    } else {
-                        print("Fleet Manager account created successfully!")
-                        self.isFirstUser = false // Hide the "Create Fleet Manager Account" button
-                    }
-                    self.isLoading = false
-                }
+                self.createDriverProfile(userId: userId, userData: userData, driverData: [
+                    "experience": experience.rawValue,
+                    "license": license,
+                    "geoPreference": geoPreference.rawValue,
+                    "vehiclePreference": vehiclePreference.rawValue,
+                    "status": true,
+                    "createdAt": Timestamp()
+                ], password: password)
             }
         }
     }
     
-    // Fetch user data from Firestore
+    private func createDriverProfile(userId: String, userData: [String: Any], driverData: [String: Any], password: String) {
+        let batch = db.batch()
+        
+        let userRef = db.collection("users").document(userId)
+        let driverRef = db.collection("drivers").document(userId)
+        
+        batch.setData(userData, forDocument: userRef)
+        batch.setData(driverData, forDocument: driverRef)
+        
+        batch.commit { [weak self] error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    self?.errorMessage = error.localizedDescription
+                    self?.showError = true
+                } else {
+                    // Here you would typically send an email to the driver with their credentials
+                    print("Driver account created successfully with email: \(userData["email"] as? String ?? "") and password: \(password)")
+                }
+                self?.isLoading = false
+            }
+        }
+    }
+    
     private func fetchUserData(userId: String) {
-        db.collection("users").document(userId).getDocument { [weak self] (snapshot: DocumentSnapshot?, error: Error?) in
+        db.collection("users").document(userId).getDocument { [weak self] snapshot, error in
             guard let self = self else { return }
             
             DispatchQueue.main.async {
@@ -118,17 +170,15 @@ class LoginViewModel: ObservableObject {
                 
                 do {
                     if let documentData = snapshot?.data() {
-                        // First get the role to determine user type
                         guard let roleString = documentData["role"] as? String,
                               let role = Role(rawValue: roleString) else {
-                            throw NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid role data"])
+                            throw NSError(domain: "", code: -1,
+                                        userInfo: [NSLocalizedDescriptionKey: "Invalid role data"])
                         }
                         
                         if role == .driver {
-                            // Fetch additional driver data
                             self.fetchDriverData(userId: userId, userData: documentData)
                         } else {
-                            // Create basic user
                             let user = try self.createUser(from: documentData)
                             user.id = userId
                             self.authenticatedUser = user
@@ -145,40 +195,14 @@ class LoginViewModel: ObservableObject {
         }
     }
     
-    // Fetch additional driver data from Firestore
     private func fetchDriverData(userId: String, userData: [String: Any]) {
-        db.collection("drivers").document(userId).getDocument { [weak self] (snapshot: DocumentSnapshot?, error: Error?) in
+        db.collection("drivers").document(userId).getDocument { [weak self] snapshot, error in
             guard let self = self else { return }
             
             DispatchQueue.main.async {
                 do {
                     if let driverData = snapshot?.data() {
-                        guard let name = userData["name"] as? String,
-                              let email = userData["email"] as? String,
-                              let phone = userData["phone"] as? String,
-                              let experienceString = driverData["experience"] as? String,
-                              let experience = Experience(rawValue: experienceString),
-                              let license = driverData["license"] as? String,
-                              let geoPreferenceString = driverData["geoPreference"] as? String,
-                              let geoPreference = GeoPreference(rawValue: geoPreferenceString),
-                              let vehiclePreferenceString = driverData["vehiclePreference"] as? String,
-                              let vehiclePreference = VehicleType(rawValue: vehiclePreferenceString),
-                              let status = driverData["status"] as? Bool else {
-                            throw NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid driver data"])
-                        }
-                        
-                        let driver = Driver(
-                            name: name,
-                            email: email,
-                            phone: phone,
-                            experience: experience,
-                            license: license,
-                            geoPreference: geoPreference,
-                            vehiclePreference: vehiclePreference,
-                            status: status
-                        )
-                        driver.id = userId
-                        
+                        let driver = try self.createDriver(userId: userId, userData: userData, driverData: driverData)
                         self.authenticatedUser = driver
                         self.setNavigationDestination(for: .driver)
                     }
@@ -191,28 +215,63 @@ class LoginViewModel: ObservableObject {
         }
     }
     
-    // Create a User object from Firestore data
+    private func createDriver(userId: String, userData: [String: Any], driverData: [String: Any]) throws -> Driver {
+        guard let name = userData["name"] as? String,
+              let email = userData["email"] as? String,
+              let phone = userData["phone"] as? String,
+              let experienceString = driverData["experience"] as? String,
+              let experience = Experience(rawValue: experienceString),
+              let license = driverData["license"] as? String,
+              let geoPreferenceString = driverData["geoPreference"] as? String,
+              let geoPreference = GeoPreference(rawValue: geoPreferenceString),
+              let vehiclePreferenceString = driverData["vehiclePreference"] as? String,
+              let vehiclePreference = VehicleType(rawValue: vehiclePreferenceString),
+              let status = driverData["status"] as? Bool else {
+            throw NSError(domain: "", code: -1,
+                         userInfo: [NSLocalizedDescriptionKey: "Invalid driver data"])
+        }
+        
+        let driver = Driver(
+            name: name,
+            email: email,
+            phone: phone,
+            experience: experience,
+            license: license,
+            geoPreference: geoPreference,
+            vehiclePreference: vehiclePreference,
+            status: status
+        )
+        driver.id = userId
+        return driver
+    }
+    
     private func createUser(from data: [String: Any]) throws -> User {
         guard let name = data["name"] as? String,
               let email = data["email"] as? String,
               let phone = data["phone"] as? String,
               let roleString = data["role"] as? String,
               let role = Role(rawValue: roleString) else {
-            throw NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid user data"])
+            throw NSError(domain: "", code: -1,
+                         userInfo: [NSLocalizedDescriptionKey: "Invalid user data"])
         }
         
         return User(name: name, email: email, phone: phone, role: role)
     }
     
-    // Set navigation destination based on user role
     private func setNavigationDestination(for role: Role) {
         switch role {
         case .fleet:
-            self.navigationDestination = "FleetDashboard"
+            navigationDestination = "FleetDashboard"
         case .driver:
-            self.navigationDestination = "DriverDashboard"
+            navigationDestination = "DriverDashboard"
         case .maintenance:
-            self.navigationDestination = "MaintenanceDashboard"
+            navigationDestination = "MaintenanceDashboard"
         }
+    }
+    
+    private func generateSecurePassword() -> String {
+        let length = 12
+        let characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*"
+        return String((0..<length).map { _ in characters.randomElement()! })
     }
 }

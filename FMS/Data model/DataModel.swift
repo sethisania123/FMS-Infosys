@@ -44,7 +44,8 @@ enum VehicleType: String, Codable {
 enum FuelType: String, Codable {
     case petrol = "Petrol"
     case diesel = "Diesel"
-    case cng = "CNG"
+    case hybrid = "Hybrid"
+    case electric = "Electric"
 }
 
 enum TripStatus: String, Codable {
