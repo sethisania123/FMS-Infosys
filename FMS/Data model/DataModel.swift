@@ -59,7 +59,7 @@ class User: Codable {
     var email: String
     var phone: String
     var role: Role
-    var dateCreated: Date = Date()
+//    var dateCreated: Date = Date()
     
     init(name: String, email: String, phone: String, role: Role) {
         self.name = name
