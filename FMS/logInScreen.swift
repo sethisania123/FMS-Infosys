@@ -149,5 +149,6 @@ struct LoginView: View {
 }
 
 #Preview {
-    LoginView()
+//    LoginView()
+    
 }
