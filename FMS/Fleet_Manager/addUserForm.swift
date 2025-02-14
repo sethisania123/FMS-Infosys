@@ -7,41 +7,34 @@
 
 import SwiftUI
 import Cloudinary
+import SwiftSMTP
 
-func sendEmail(to email: String, name: String, password: String) {
-    let scriptURL = "https://script.google.com/macros/s/AKfycbxe4IZA_N2g_jO4bu74zbKfvY0mteu1I_tYctnFoU5ffjO-mHCz3bhb_nsn8JuiTGgcgw/exec"
-    
-    let subject = "Your FMS Account Details"
-    let message = """
-    Hello \(name),
-    
-    Your FMS account has been created successfully.
-    
-    Your login credentials are:
-    Email: \(email)
-    Password: \(password)
-    Best regards,
-    FMS Team
-    """
-    
-    let parameters: [String: String] = [
-        "recipient": email,
-        "subject": subject,
-        "message": message
-    ]
-    
-    var request = URLRequest(url: URL(string: scriptURL)!)
-    request.httpMethod = "POST"
-    request.httpBody = try? JSONSerialization.data(withJSONObject: parameters)
-    request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-    
-    URLSession.shared.dataTask(with: request) { data, response, error in
+func sendEmail(to email: String, completion: @escaping (Bool, String) -> Void) {
+    let smtp = SMTP(
+        hostname: "smtp.gmail.com",  // Change this for Outlook, Yahoo, etc.
+        email: "sohamchakraborty18.edu@gmail.com",  // Replace with your sender email
+        password: "nvyanzllnqpudxha", // Use App Password (not Gmail password)
+        port: 465, // Use 587 for TLS
+        tlsMode: .requireTLS
+    )
+
+    let from = Mail.User(name: "Team 5", email: "sohamchakraborty18.edu@gmail.com")
+    let to = Mail.User(name: "User", email: email)
+
+    let mail = Mail(
+        from: from,
+        to: [to],
+        subject: "Your Login Credentials",
+        text: "The login credentials for your account are as follows:\n\nEmail: \(email)\nPassword: \(UUID().uuidString)"
+    )
+
+    smtp.send(mail) { error in
         if let error = error {
-            print("❌ Error sending email: \(error.localizedDescription)")
+            completion(false, "Error sending email: \(error.localizedDescription)")
         } else {
-            print("✅ Email sent successfully!")
+            completion(true, "OTP sent successfully to \(email)")
         }
-    }.resume()
+    }
 }
 
 struct AddUserForm: View {
@@ -284,10 +277,14 @@ struct AddUserView: View {
         }
         
         // Send email with credentials
-        sendEmail(to: self.email, name: self.name, password: generatedPassword)
-        isLoading = false
-        alertMessage = "Account created successfully. Login details have been sent to \(email)"
-        showingAlert = true
+//        sendEmail(to: self.email, name: self.name, password: generatedPassword)
+        sendEmail(to: self.email) { success, message in
+            DispatchQueue.main.async {
+                self.isLoading = false
+                self.alertMessage = message
+                self.showingAlert = true
+            }
+        }
     }
     
     func uploadLicensePhotoToCloudinary() {

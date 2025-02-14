@@ -70,7 +70,7 @@ class LoginViewModel: ObservableObject {
         errorMessage = nil
         
         
-        let userDataDict = ["email": email, "name": name, "phone": phone, "role": Role.fleet.rawValue] as [String : Any]
+        let userDataDict = ["email": email, "name": name, "phone": phone, "password": password, "role": Role.fleet.rawValue] as [String : Any]
         let database = Firestore.firestore()
         let newUserCollectionRef = database.collection("users").document(UUID().uuidString)
         newUserCollectionRef.setData(userDataDict)
@@ -88,6 +88,7 @@ class LoginViewModel: ObservableObject {
         guard !email.isEmpty, !name.isEmpty, !phone.isEmpty, !license.isEmpty else {
             errorMessage = "All fields are required"
             showError = true
+            
             isLoading = false
             return
         }
@@ -118,6 +119,7 @@ class LoginViewModel: ObservableObject {
                     "email": email,
                     "phone": phone,
                     "role": Role.driver.rawValue,
+                    "password": password,
                     "createdAt": Timestamp()
                 ]
                 
@@ -145,11 +147,13 @@ class LoginViewModel: ObservableObject {
         batch.commit { [weak self] error in
             DispatchQueue.main.async {
                 if let error = error {
-                    self?.errorMessage = error.localizedDescription
+                    self?.errorMessage = "Firestore batch commit failed: \(error.localizedDescription)"
                     self?.showError = true
+                    print("Firestore Error: \(error.localizedDescription)")
                 } else {
-                    // Here you would typically send an email to the driver with their credentials
                     print("Driver account created successfully with email: \(userData["email"] as? String ?? "") and password: \(password)")
+                    print("User Data: \(userData)")
+                    print("Driver Data: \(driverData)")
                 }
                 self?.isLoading = false
             }
