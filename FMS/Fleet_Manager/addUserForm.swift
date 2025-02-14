@@ -69,26 +69,63 @@ struct AddUserView: View {
     let cloudinary = CLDCloudinary(configuration: CLDConfiguration(cloudName: "dztmc60fg", apiKey: "489983833873463", apiSecret: "UN-I5BTJCTmvx-yGsyMo9i-kpr4"))
     
     var experiencePicker: some View {
-        Picker("Select Experience ", selection: $selectedExperience) {
+        Menu {
             ForEach(Experience.allCases, id: \.self) { exp in
-                Text(exp.rawValue).tag(exp)
+                Button(exp.rawValue) {
+                    selectedExperience = exp
+                }
             }
+        } label: {
+            HStack {
+                Text(selectedExperience.rawValue)
+                    .foregroundColor(selectedExperience == .lessThanOne ? .gray : .black)
+                Spacer()
+                Image(systemName: "chevron.down")
+            }
+            .padding(.all,2)
+            .background(Color(.white))
+            .cornerRadius(8)
         }
+    
     }
     
     var vehicleTypePicker: some View {
-        Picker("Select Vehicle", selection: $selectedVehicleType) {
+        Menu {
             ForEach(VehicleType.allCases, id: \.self) { type in
-                Text(type.rawValue).tag(type)
+                Button(type.rawValue) {
+                    selectedVehicleType = type
+                }
             }
+        } label: {
+            HStack {
+                Text(selectedVehicleType.rawValue)
+                    .foregroundColor(selectedVehicleType == .truck ? .gray : .black)
+                Spacer()
+                Image(systemName: "chevron.down")
+            }
+            .padding(.all,2)
+            .background(Color(.white))
+            .cornerRadius(8)
         }
     }
     
     var geoAreaPicker: some View {
-        Picker("Select Specialization Areas", selection: $selectedGeoArea) {
-            ForEach(GeoPreference.allCases, id: \.self) { area in
-                Text(area.rawValue).tag(area)
+        Menu {
+            ForEach(GeoPreference.allCases, id: \.self) { exp in
+                Button(exp.rawValue) {
+                    selectedGeoArea = exp
+                }
             }
+        } label: {
+            HStack {
+                Text(selectedGeoArea.rawValue)
+                    .foregroundColor(selectedGeoArea == .plain ? .gray : .black)
+                Spacer()
+                Image(systemName: "chevron.down")
+            }
+            .padding(.all,2)
+            .background(Color(.white))
+            .cornerRadius(8)
         }
     }
     
