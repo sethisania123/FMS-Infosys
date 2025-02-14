@@ -2,7 +2,7 @@ import SwiftUI
 import FirebaseFirestore
 
 
-struct DriverListView: View {
+struct FMListView: View {
     @State private var users: [User] = []
     private let db = Firestore.firestore()
     
@@ -20,12 +20,13 @@ struct DriverListView: View {
             }
             .padding()
         }
-        .onAppear(perform: fetchUsersDriver)
+        .onAppear(perform: fetchUsersMP)
         .navigationTitle("Drivers")
     }
     
-    private func fetchUsersDriver() {
-        db.collection("users").whereField("role", isEqualTo: "Driver").getDocuments { snapshot, error in
+    
+    private func fetchUsersMP() {
+        db.collection("users").whereField("role", isEqualTo: "Maintenance Personnel").getDocuments { snapshot, error in
             guard let documents = snapshot?.documents, error == nil else {
                 print("Error fetching users: \(error?.localizedDescription ?? "Unknown error")")
                 return
@@ -36,6 +37,4 @@ struct DriverListView: View {
             }
         }
     }
-    
-
 }
