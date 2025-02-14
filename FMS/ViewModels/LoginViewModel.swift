@@ -66,18 +66,18 @@ class LoginViewModel: ObservableObject {
     }
     
     func createFleetManagerAccount(email: String, password: String, name: String, phone: String) {
-        isLoading = true
-        errorMessage = nil
-        
-        
-        let userDataDict = ["email": email, "name": name, "phone": phone, "password": password, "role": Role.fleet.rawValue] as [String : Any]
-        let database = Firestore.firestore()
-        let newUserCollectionRef = database.collection("users").document(UUID().uuidString)
-        newUserCollectionRef.setData(userDataDict)
-        
-        self.isLoading = false
-        
-    }
+            isLoading = true
+            errorMessage = nil
+            
+            
+            let userDataDict = ["email": email, "name": name, "phone": phone, "password": password, "role": Role.fleet.rawValue] as [String : Any]
+            let database = Firestore.firestore()
+            let newUserCollectionRef = database.collection("users").document(UUID().uuidString)
+            newUserCollectionRef.setData(userDataDict)
+            
+            self.isLoading = false
+            
+        }
     
     func createDriverAccount(name: String, email: String, password: String, phone: String, experience: Experience,
                            license: String, geoPreference: GeoPreference, vehiclePreference: VehicleType) {
