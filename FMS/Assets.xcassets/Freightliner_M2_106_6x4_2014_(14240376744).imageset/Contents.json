@@ -1,0 +1,21 @@
+{
+  "images" : [
+    {
+      "filename" : "Freightliner_M2_106_6x4_2014_(14240376744).jpg",
+      "idiom" : "universal",
+      "scale" : "1x"
+    },
+    {
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+      "idiom" : "universal",
+      "scale" : "3x"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
