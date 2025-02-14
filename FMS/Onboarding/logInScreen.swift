@@ -15,18 +15,19 @@ struct LoginView: View {
         let db = Firestore.firestore()
         
         db.collection("users").getDocuments() { (querySnapshot, err) in
-            if let error = err {
+            if err != nil {
                 print(err?.localizedDescription ?? "error here")
             } else {
                 for doc in querySnapshot!.documents {
                     let data = doc.data()
-                    
-                    if data["email"] as! String == self.email && data["password"] as! String == self.password {
-                        if let roleString = data["role"] as? String, let role = Role(rawValue: roleString) {
-                            self.userRole = role
-                            self.isPageChanging = true
+                    if let dataEmail = data["email"], let dataPassword = data["password"]{
+                        if dataEmail as! String == self.email && dataPassword as! String == self.password {
+                            if let roleString = data["role"] as? String, let role = Role(rawValue: roleString) {
+                                self.userRole = role
+                                self.isPageChanging = true
+                            }
+                            return // Exit the loop once a match is found
                         }
-                        return // Exit the loop once a match is found
                     }
                 }
                 print("Login Failed")
@@ -97,10 +98,12 @@ struct LoginView: View {
                 // Forgot Password
                 HStack {
                     Spacer()
-                    Text("Forgot Password?")
-                        .font(.system(size: 18))
-                        .foregroundColor(.blue)
-                        .padding(.trailing)
+                    NavigationLink(destination: ForgetPassword()) {
+                                            Text("Forgot Password?")
+                                                .font(.system(size: 18))
+                                                .foregroundColor(.blue)
+                                                .padding(.trailing)
+                                        }
                 }
                 
                 // Sign In Button
