@@ -11,21 +11,52 @@ struct Vehicledummy: Identifiable {
     let name: String
     let type: String
     let status: String
-    let statusColor: Color
 }
 
 struct VehicleListView: View {
     @State private var searchText = ""
+    @State private var selectedType: String = "All"
+    @State private var selectedStatus: String = "All"
+    @State private var sortOption: String = "All"
+    
     @State private var vehicles = [
-        Vehicledummy(name: "DEF 456", type: "Truck", status: "Active", statusColor: .green),
-        Vehicledummy(name: "ABC 123", type: "Sedan", status: "Inactive", statusColor: .red),
-        Vehicledummy(name: "XYZ 789", type: "Van", status: "Active", statusColor: .green),
-        Vehicledummy(name: "DEF 456", type: "Truck", status: "Active", statusColor: .green),
-        Vehicledummy(name: "ABC 123", type: "Sedan", status: "Inactive", statusColor: .red),
-        Vehicledummy(name: "ABC 123", type: "Sedan", status: "Inactive", statusColor: .red),
-        Vehicledummy(name: "DEF 456", type: "Truck", status: "Active", statusColor: .green),
-        Vehicledummy(name: "XYZ 789", type: "Van", status: "Active", statusColor: .green),
+        Vehicledummy(name: "DEF 456", type: "Truck", status: "Active"),
+        Vehicledummy(name: "ABC 123", type: "Sedan", status: "Inactive"),
+        Vehicledummy(name: "XYZ 789", type: "Van", status: "Active"),
+        Vehicledummy(name: "DEF 456", type: "Truck", status: "Active"),
+        Vehicledummy(name: "ABC 123", type: "Sedan", status: "Inactive"),
+        Vehicledummy(name: "ABC 123", type: "Sedan", status: "Inactive"),
+        Vehicledummy(name: "DEF 456", type: "Truck", status: "Active"),
+        Vehicledummy(name: "XYZ 789", type: "Van", status: "Active"),
     ]
+    
+    // Filtered and Sorted Vehicles
+    var filteredVehicles: [Vehicledummy] {
+        var filtered = vehicles
+        
+        if selectedType != "All" {
+            filtered = filtered.filter { $0.type == selectedType }
+        }
+        
+        if selectedStatus != "All" {
+            filtered = filtered.filter { $0.status == selectedStatus }
+        }
+        
+        if !searchText.isEmpty {
+            filtered = filtered.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+        }
+        
+        switch sortOption {
+        case "Sort by Name":
+            filtered.sort { $0.name < $1.name }
+        case "Sort by Status":
+            filtered.sort { $0.status < $1.status }
+        default:
+            break
+        }
+        
+        return filtered
+    }
     
     var body: some View {
         NavigationStack {
@@ -33,80 +64,98 @@ struct VehicleListView: View {
                 // Search Bar
                 TextField("Search vehicles...", text: $searchText)
                     .padding(10)
-                    .background(Color(.systemGray6))
+                    .background(Color(.white))
                     .cornerRadius(10)
                     .padding(.horizontal)
-
+                    .padding(.top, 35)
+                
                 // Filters
-                HStack {
-                    Menu("all") {
-                        Button("Truck") {}
-                        Button("Sedan") {}
-                        Button("Van") {}
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(8)
+                VStack(alignment: .leading) {
+                    Text("Filter")
+                        .font(.headline)
+                        .foregroundColor(.gray)
+                        .padding(.leading, 20)
+                        .padding(.bottom, -8)
                     
-                    Menu("all") {
-                        Button("Active") {}
-                        Button("Inactive") {}
+                    HStack {
+                        // Type Filter
+                        Menu {
+                            Button("All") { selectedType = "All" }
+                            Button("Truck") { selectedType = "Truck" }
+                            Button("Sedan") { selectedType = "Sedan" }
+                            Button("Van") { selectedType = "Van" }
+                        } label: {
+                            filterMenuLabel(text: selectedType)
+                        }
+                        
+                        // Status Filter
+                        Menu {
+                            Button("All") { selectedStatus = "All" }
+                            Button("Active") { selectedStatus = "Active" }
+                            Button("Inactive") { selectedStatus = "Inactive" }
+                        } label: {
+                            filterMenuLabel(text: selectedStatus)
+                        }
+                        
+                        // Sorting Options
+                        Menu {
+                            Button("All") { sortOption = "All" }
+                            Button("Sort by Name") { sortOption = "Sort by Name" }
+                            Button("Sort by Status") { sortOption = "Sort by Status" }
+                        } label: {
+                            filterMenuLabel(text: sortOption)
+                        }
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(8)
-
-                    Menu("all") {
-                        Button("Sort by Name") {}
-                        Button("Sort by Status") {}
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(8)
+                    .padding(.horizontal)
                 }
-                .padding(.horizontal)
-
-                // Vehicledummy List
+                
+                // Vehicle List
                 List {
-                    ForEach(vehicles.filter { searchText.isEmpty || $0.name.localizedCaseInsensitiveContains(searchText) }) { Vehicledummy in
+                    ForEach(filteredVehicles) { vehicle in
                         HStack {
                             Image(systemName: "car.fill")
                                 .foregroundColor(.gray)
                             VStack(alignment: .leading) {
-                                Text(Vehicledummy.name)
+                                Text(vehicle.name)
                                     .font(.headline)
-                                Text(Vehicledummy.type)
+                                Text(vehicle.type)
                                     .font(.subheadline)
                                     .foregroundColor(.gray)
                             }
                             Spacer()
-                            Text(Vehicledummy.status)
-                                .foregroundColor(Vehicledummy.statusColor)
-//                            Button(action: {
-//                                // Handle delete action
-//                            }) {
-//                                Image(systemName: "trash")
-//                                    
-////                                    .foregroundColor(.red)
-//                            }
+                            Text(vehicle.status)
+                                .foregroundColor(vehicle.status == "Active" ? .green : .red)
                         }
                         .padding(.vertical, 5)
                     }
+                    .onDelete(perform: deleteVehicle)
                 }
+                .background(Color(.systemGray6))
             }
-//            .navigationTitle("Vehicles")
-//            .navigationBarTitleDisplayMode(.inline)
             .navigationBarItems(trailing: Button(action: {}) {
                 Image(systemName: "plus")
-            })
+            }).background(Color(.systemGray6))
         }
+    }
+    
+    private func deleteVehicle(at offsets: IndexSet) {
+        vehicles.remove(atOffsets: offsets)
+    }
+    
+    private func filterMenuLabel(text: String) -> some View {
+        HStack {
+            Text(text)
+                .foregroundColor(.black)
+            Image(systemName: "chevron.down")
+                .foregroundColor(.gray)
+        }
+        .padding()
+        .frame(maxWidth: .infinity)
+        .background(Color.white)
+        .cornerRadius(15)
     }
 }
 
 #Preview {
     VehicleListView()
 }
-

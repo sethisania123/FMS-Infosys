@@ -47,21 +47,26 @@ struct DriverListView: View {
                         ForEach(filteredDrivers) { Driver2 in
                             HStack {
                                 Image(systemName: "person.crop.circle.fill")
-                                    .foregroundColor(.gray)
+                                    .foregroundColor(.black)
                                     .font(.title2)
+                                    .padding(.bottom,50)
                                 VStack(alignment: .leading, spacing: 5) {
-                                    Text(Driver2.name)
-                                        .font(.headline)
-                                        .bold()
-                                    Text(Driver2.phoneNumber)
-                                        .font(.subheadline)
-                                        .foregroundColor(.gray)
+                                    VStack{
+                                        Text(Driver2.name)
+                                            .font(.headline)
+                                            .bold()
+                                        Text(Driver2.phoneNumber)
+                                            .font(.subheadline)
+                                            .foregroundColor(.black)
+                                    }.padding(3)
                                     Text("Experience: \(Driver2.experience)")
                                         .font(.footnote)
-                                        .foregroundColor(.gray)
+                                        .foregroundColor(.black)
+                                        .padding(.leading,-30)
                                     Text("Terrain specialisation: \(Driver2.specialization)")
                                         .font(.footnote)
-                                        .foregroundColor(.gray)
+                                        .foregroundColor(.black)
+                                        .padding(.leading,-30)
                                 }
                                 Spacer()
                                 
@@ -73,6 +78,7 @@ struct DriverListView: View {
                                     .padding(5)
                                     .background(Color.green.opacity(0.2))
                                     .cornerRadius(10)
+                                    .padding(.bottom,70)
                                 
                                 // Delete Button
 //                                Button(action: {
@@ -90,22 +96,22 @@ struct DriverListView: View {
                     .padding()
                 }
             }
-            .navigationTitle("Drivers")
+//            .navigationTitle("Drivers")
 //            .navigationBarTitleDisplayMode(.inline)
 //            .navigationBarItems(leading: Button("Back") {}, trailing: EmptyView())
-            .toolbar {
-                ToolbarItemGroup(placement: .bottomBar) {
-                    Spacer()
-                    Image(systemName: "house")
-                    Spacer()
-                    Image(systemName: "square.stack.3d.up")
-                    Spacer()
-                    Image(systemName: "star")
-                    Spacer()
-                    Image(systemName: "ellipsis")
-                    Spacer()
-                }
-            }
+//            .toolbar {
+//                ToolbarItemGroup(placement: .bottomBar) {
+//                    Spacer()
+//                    Image(systemName: "house")
+//                    Spacer()
+//                    Image(systemName: "square.stack.3d.up")
+//                    Spacer()
+//                    Image(systemName: "star")
+//                    Spacer()
+//                    Image(systemName: "ellipsis")
+//                    Spacer()
+//                }
+//            }
         }
     }
 }
