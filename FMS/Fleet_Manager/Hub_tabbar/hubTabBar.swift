@@ -59,7 +59,10 @@ struct hubTabBar: View {
                             .font(.system(size: 19.5))
                             .bold()
                         Spacer()
-                        NavigationLink(destination:DriverListView())
+                        NavigationLink(destination:DriverListView()
+                            .navigationTitle("Drivers")
+                            .navigationBarTitleDisplayMode(.inline)
+                            )
                         {
                             Text("View All")
                                 .font(.system(size: 17))
@@ -74,7 +77,9 @@ struct hubTabBar: View {
                             .font(.system(size: 19.5))
                             .bold()
                         Spacer()
-                        NavigationLink(destination:MaintenanceListView())
+                        NavigationLink(destination:MaintenanceListView()
+                            .navigationTitle("Maintenance Personnel")
+                            .navigationBarTitleDisplayMode(.inline))
                         {
                             Text("View All")
                                 .font(.system(size: 17))
@@ -83,6 +88,7 @@ struct hubTabBar: View {
                     }
                     .padding(.horizontal)
                     Spacer()
+                  
                 }
                 .padding(.top)
             }

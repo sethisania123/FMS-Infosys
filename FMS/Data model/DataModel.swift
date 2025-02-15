@@ -70,7 +70,7 @@ class User: Codable {
     }
 }
 
-class Driver: User {
+class Driver: User, Identifiable {
     var experience: Experience
     var license: String
     var geoPreference: GeoPreference

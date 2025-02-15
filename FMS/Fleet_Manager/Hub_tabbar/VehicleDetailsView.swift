@@ -11,7 +11,7 @@ struct VehicleDetailsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 // Vehicle Image
-                Image("vehicle_image") // Replace with actual image asset
+                Image("Freightliner_M2_106_6x4_2014_(14240376744)") // Replace with actual image asset
                     .resizable()
                     .scaledToFit()
                     .frame(height: 200)
@@ -30,10 +30,20 @@ struct VehicleDetailsView: View {
 
                 // Documents
                 Group {
-                    DocumentView(title: "RC", imageName: "rc_image") // Replace with actual asset name
-                    DocumentView(title: "Insurance", imageName: "insurance_image")
-                    DocumentView(title: "Pollution Certificate", imageName: "pollution_certificate_image")
+                    DocumentView(
+                        title: "RC",
+                        imageName: UIImage(named: "Freightliner_M2_106_6x4_2014_(14240376744)") ?? UIImage()
+                    )
+                    DocumentView(
+                        title: "Insurance",
+                        imageName: UIImage(named: "Freightliner_M2_106_6x4_2014_(14240376744)") ?? UIImage()
+                    )
+                    DocumentView(
+                        title: "Pollution Certificate",
+                        imageName: UIImage(named: "FFreightliner_M2_106_6x4_2014_(14240376744)") ?? UIImage()
+                    )
                 }
+
             }
             .padding(.top)
         }
@@ -75,14 +85,14 @@ struct DetailField: View {
 // Component for displaying document images
 struct DocumentView: View {
     let title: String
-    let imageName: String
+    let imageName: UIImage
     
     var body: some View {
         VStack(alignment: .leading) {
             Text(title)
                 .font(.headline)
                 .padding(.horizontal)
-            Image(imageName)
+            Image(uiImage: imageName)
                 .resizable()
                 .scaledToFit()
                 .frame(height: 150)
