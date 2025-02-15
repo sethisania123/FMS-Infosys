@@ -4,10 +4,14 @@
 //
 //  Created by Ankush Sharma on 13/02/25.
 //
+
 import SwiftUI
+import FirebaseFirestore
+
 //------------------------------------------------
+// Example Structs
 //------------------------------------------------
-    //Example struct 
+
 struct Vehicle3: Identifiable {
     let id = UUID()
     let name: String
@@ -17,78 +21,35 @@ struct Vehicle3: Identifiable {
     let statusColor: Color
 }
 
-struct Driver3: Identifiable {
-    let id = UUID()
-    let name: String
-    let phone: String
-    let status: String
-    let statusColor: Color
-}
+
 //------------------------------------------------
+// Main View
 //------------------------------------------------
 
 struct hubTabBar: View {
+    @State var users: [User] = []
+    let db = Firestore.firestore()
+    
     var body: some View {
         NavigationView {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     
-                    
-                    HStack {
-                        Text("Vehicle")
-                            .font(.system(size: 19.5))
-                            .bold()
-                        Spacer()
-                        VStack {
-                            NavigationLink(destination:VehicleListView()
-                                .navigationTitle("Vehicle")
-                                .navigationBarTitleDisplayMode(.inline)
-                                           
-                            ){
-                                Text("View All")
-                                    .font(.system(size: 17))
-                                    .foregroundColor(.blue)
-                            }
-                        }
-                    }
-                    .padding(.horizontal)
+                    // Vehicles Section
+                    SectionHeader(title: "Vehicle", destination: VehicleListView())
                     VehicleList()
                     
-                    HStack {
-                        Text("Drivers")
-                            .font(.system(size: 19.5))
-                            .bold()
-                        Spacer()
-                        NavigationLink(destination:DriverListView()
-                            .navigationTitle("Drivers")
-                            .navigationBarTitleDisplayMode(.inline)
-                            )
-                        {
-                            Text("View All")
-                                .font(.system(size: 17))
-                                .foregroundColor(.blue)
-                        }
-                    }
-                    .padding(.horizontal)
-                    DriverList()
+                    // Drivers Section
+                    SectionHeader(title: "Drivers", destination: DriverListView()
+)
+                    DriverList(filteredUsers: users)
                     
-                    HStack {
-                        Text("Maintenance Personel")
-                            .font(.system(size: 19.5))
-                            .bold()
-                        Spacer()
-                        NavigationLink(destination:MaintenanceListView()
-                            .navigationTitle("Maintenance Personnel")
-                            .navigationBarTitleDisplayMode(.inline))
-                        {
-                            Text("View All")
-                                .font(.system(size: 17))
-                                .foregroundColor(.blue)
-                        }
-                    }
-                    .padding(.horizontal)
-                    Spacer()
-                  
+                    // Maintenance Personnel Section
+                    SectionHeader(title: "Maintenance Personnel", destination: MaintenanceListView())
+                    MaintenancePersonnelLists()
+//                    MaintenancePersonnelListView()
+                
+//                    MaintenancePersonnelListview()
                 }
                 .padding(.top)
             }
@@ -98,42 +59,63 @@ struct hubTabBar: View {
                 UINavigationBar.appearance().backgroundColor = .white
                 UINavigationBar.appearance().shadowImage = UIImage()
                 UINavigationBar.appearance().isTranslucent = false
+                fetchUsersDriver()
             }
-            
+        }
+    }
+    
+    func fetchUsersDriver() {
+        db.collection("users").whereField("role", isEqualTo: "Driver").getDocuments { snapshot, error in
+            guard let documents = snapshot?.documents, error == nil else {
+                print("Error fetching users: \(error?.localizedDescription ?? "Unknown error")")
+                return
+            }
+            self.users = documents.compactMap { doc in
+                let user = try? doc.data(as: User.self)
+                return user?.id != nil ? user : nil
+            }
         }
     }
 }
-//
-//struct SectionHeader: View {
-//    var title: String
-//    
-//    var body: some View {
-//        HStack {
-//            Text(title)
-//                .font(.headline)
-//                .bold()
-//            Spacer()
-//            NavigationLink(destination:VehicleListView())
-//            {
-//                Text("View All")
-//                    .font(.caption)
-//                    .foregroundColor(.blue)
-//            }
-//        }
-//        .padding(.horizontal)
-//    }
-//}
+
+//------------------------------------------------
+// Section Header Component
+//------------------------------------------------
+
+struct SectionHeader<Destination: View>: View {
+    var title: String
+    var destination: Destination
+    
+    var body: some View {
+        HStack {
+            Text(title)
+                .font(.system(size: 19.5))
+                .bold()
+            Spacer()
+            NavigationLink(destination: destination) {
+                Text("View All")
+                    .font(.system(size: 17))
+                    .foregroundColor(.blue)
+            }
+        }
+        .padding(.horizontal)
+    }
+}
+
+//------------------------------------------------
+// Vehicle List Component
+//------------------------------------------------
 
 struct VehicleList: View {
     let vehicles = [
-        Vehicle3(name: "Bharat Benz 2019", number: "PB 62 AB 0987", status: "Active",  image: UIImage(named: "Freightliner_M2_106_6x4_2014_(14240376744)") ?? UIImage(), statusColor: .green),
+        Vehicle3(name: "Bharat Benz 2019", number: "PB 62 AB 0987", status: "Active", image: UIImage(named: "Freightliner_M2_106_6x4_2014_(14240376744)") ?? UIImage(), statusColor: .green),
         Vehicle3(name: "Bharat Benz 2020", number: "PB 62 AB 0001", status: "Maintenance", image: UIImage(named: "Freightliner_M2_106_6x4_2014_(14240376744)") ?? UIImage(), statusColor: .yellow)
     ]
     
     var body: some View {
         VStack {
-            ForEach(vehicles) { Vehicle3 in
-                VehicleCard(Vehicle3: Vehicle3)
+            ForEach(vehicles) { vehicle in
+                VehicleCard(vehicle: vehicle)
             }
         }
         .padding(.horizontal)
@@ -141,55 +123,53 @@ struct VehicleList: View {
 }
 
 struct VehicleCard: View {
-    var Vehicle3: Vehicle3
+    var vehicle: Vehicle3
     
     var body: some View {
         HStack(spacing: 12) {
-            Image(uiImage: Vehicle3.image)  // Use Image(uiImage:) for UIImage
+            Image(uiImage: vehicle.image)
                 .resizable()
                 .scaledToFit()
                 .frame(width: 100, height: 100)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
-
             
             VStack(alignment: .leading, spacing: 4) {
-                Text(Vehicle3.name)
+                Text(vehicle.name)
                     .font(.headline)
-                Text(Vehicle3.number)
+                Text(vehicle.number)
                     .font(.subheadline)
                     .foregroundColor(.gray)
                 
                 HStack {
                     Circle()
-                        .fill(Vehicle3.statusColor)
+                        .fill(vehicle.statusColor)
                         .frame(width: 8, height: 8)
-                    Text(Vehicle3.status)
+                    Text(vehicle.status)
                         .font(.caption)
                         .foregroundColor(.gray)
                 }
             }
             Spacer()
         }
-        .padding()
+        
         .background(Color(.systemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .shadow(color: Color.black.opacity(0.1), radius: 3)
     }
 }
 
+//------------------------------------------------
+// Driver List Component
+//------------------------------------------------
+
 struct DriverList: View {
-    let drivers = [
-        Driver3(name: "Ram Prasad", phone: "+91 7635467832", status: "Available", statusColor: .green),
-        Driver3(name: "Viren Sharma", phone: "+91 7635467832", status: "On Trip", statusColor: .yellow),
-        Driver3(name: "Viren Sharma", phone: "+91 7635467832", status: "On Trip", statusColor: .yellow),
-        Driver3(name: "Viren Sharma", phone: "+91 7635467832", status: "On Trip", statusColor: .yellow)
-    ]
+    var filteredUsers: [User]
     
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 12) {
-                ForEach(drivers) { Driver3 in
-                    DriverCard(Driver3: Driver3)
+                ForEach(filteredUsers) { user in
+                    DriverCard(user: user)
                 }
             }
             .padding(.horizontal)
@@ -198,42 +178,94 @@ struct DriverList: View {
 }
 
 struct DriverCard: View {
-    var Driver3: Driver3
+    var user: User
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
-                Image(systemName: "person.fill")
+                Image(systemName: "person.crop.circle.fill")
                     .resizable()
                     .frame(width: 35, height: 35)
+                    .padding(.leading,-20)
+                    .padding(.top,-25)
+                
                 
                 VStack(alignment: .leading) {
-                    Text(Driver3.name)
-                        .font(.headline)
-                    Text(Driver3.phone)
+                    Text(user.name)
+                        .font(.title3)
+                       
+                      
+                    Text(user.phone)
                         .font(.subheadline)
-                        .foregroundColor(.gray)
+                        .foregroundColor(.black)
                 }
-            }
-//            .padding(.top,-50)
+                .padding(.top,-27)
+                .padding(.leading,10)
+                .padding(.trailing,-15)
+            }.padding(.top,40)
             
             HStack {
                 Circle()
-                    .fill(Driver3.statusColor)
+//                    .fill(user.statusColor)
                     .frame(width: 8, height: 8)
-                Text(Driver3.status)
+                Text(user.name)
                     .font(.caption)
                     .foregroundColor(.gray)
             }.padding(.top,20)
+                .padding(.leading,-30)
         }
-//        .padding()
-        .frame(width: 200,height:120)
+        .frame(width: 200, height: 120)
         .background(Color(.systemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .shadow(color: Color.black.opacity(0.1), radius: 3)
     }
 }
 
+//------------------------------------------------
+// Preview
+//------------------------------------------------
+
+struct MaintenancePersonnelLists: View {
+    @State private var maintenanceList = [
+        MaintenancePerson(name: "Ram Prasad", email: "john.anderson@example.com"),
+        MaintenancePerson(name: "Sham Prasad", email: "sham.anderson@example.com"),
+        MaintenancePerson(name: "Raam Prasad", email: "raam.anderson@example.com")
+    ]
+
+    var body: some View {
+        NavigationView {
+            List {
+                ForEach(maintenanceList) { person in
+                    HStack {
+                        Image(systemName: "person.crop.circle")
+                            .foregroundColor(.gray)
+                            .font(.title2)
+                        
+                        VStack(alignment: .leading) {
+                            Text(person.name)
+                                .font(.headline)
+                            Text(person.email)
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                        }
+                        Spacer()
+                    }
+                    .padding(.vertical, 5)
+                    .padding(.horizontal, 16)
+                    .frame(maxWidth: 350)
+                    .background(Color.white)
+                    .cornerRadius(10)
+                }
+                .onDelete(perform: deletePerson)
+            }
+            
+        }
+    }
+
+    private func deletePerson(at offsets: IndexSet) {
+        maintenanceList.remove(atOffsets: offsets)
+    }
+}
 
 
 #Preview {

@@ -19,7 +19,8 @@ struct MaintenanceListView: View {
 //                .navigationTitle("Maintenance")
                 // Uncomment if you need a back button or other navigation items
                 //.navigationBarItems(leading: Button("Back") { })
-        }
+        }.navigationTitle("Maintenance Personnel")
+            .navigationBarTitleDisplayMode(.inline)
     }
 }
 
@@ -33,14 +34,15 @@ struct MaintenancePersonnelListview: View {
 
     var body: some View {
         VStack {
-            // Search Bar
+           
             TextField("Search", text: $searchText)
                 .padding(10)
+              
                 .background(Color.white)
                 .cornerRadius(10)
                 .padding(.horizontal)
 
-            // Maintenance List
+        
             List {
                 ForEach(maintenanceList.filter { searchText.isEmpty || $0.name.localizedCaseInsensitiveContains(searchText) || $0.email.localizedCaseInsensitiveContains(searchText) }) { person in
                     HStack {
@@ -67,12 +69,11 @@ struct MaintenancePersonnelListview: View {
                 .onDelete(perform: deletePerson)
             }
             .listStyle(PlainListStyle())
-        }
+        }.padding(.top,20)
         .background(Color(.systemGray6))
     }
 
     private func deletePerson(at offsets: IndexSet) {
-        // Make sure to delete the item from the actual data array
         maintenanceList.remove(atOffsets: offsets)
     }
 }
