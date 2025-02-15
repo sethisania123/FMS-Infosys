@@ -16,7 +16,7 @@ struct MaintenanceListView: View {
     var body: some View {
         NavigationStack {
             MaintenancePersonnelListview()
-                .navigationTitle("Maintenance")
+//                .navigationTitle("Maintenance")
                 // Uncomment if you need a back button or other navigation items
                 //.navigationBarItems(leading: Button("Back") { })
         }
