@@ -41,7 +41,7 @@ enum VehicleType: String, Codable, CaseIterable {
     case car = "Car"
 }
 
-enum FuelType: String, Codable {
+enum FuelType: String, Codable, CaseIterable{
     case petrol = "Petrol"
     case diesel = "Diesel"
     case hybrid = "Hybrid"
