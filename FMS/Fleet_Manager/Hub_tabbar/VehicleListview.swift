@@ -131,11 +131,15 @@ struct VehicleListView: View {
                     .onDelete(perform: deleteVehicle)
                 }
                 .background(Color(.systemGray6))
-            }
-            .navigationBarItems(trailing: Button(action: {}) {
-                Image(systemName: "plus")
-            }).background(Color(.systemGray6))
+            }.background(Color(.systemGray6))
+            .padding(.top,20)
+            
+//            .navigationBarItems(trailing: Button(action: {}) {
+//                Image(systemName: "plus")
+//            }).background(Color(.systemGray6))
         }
+        .navigationTitle("Vehicle")
+            .navigationBarTitleDisplayMode(.inline)
     }
     
     private func deleteVehicle(at offsets: IndexSet) {

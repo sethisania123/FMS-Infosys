@@ -54,7 +54,7 @@ enum TripStatus: String, Codable {
     case completed = "Completed"
 }
 
-class User: Codable {
+class User: Codable,Identifiable {
     @DocumentID var id: String? = UUID().uuidString
     var name: String
     var email: String
@@ -70,7 +70,7 @@ class User: Codable {
     }
 }
 
-class Driver: User, Identifiable {
+class Driver: User {
     var experience: Experience
     var license: String
     var geoPreference: GeoPreference

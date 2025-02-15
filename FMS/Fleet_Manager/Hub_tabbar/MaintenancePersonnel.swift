@@ -19,7 +19,8 @@ struct MaintenanceListView: View {
 //                .navigationTitle("Maintenance")
                 // Uncomment if you need a back button or other navigation items
                 //.navigationBarItems(leading: Button("Back") { })
-        }
+        }.navigationTitle("Maintenance Personnel")
+            .navigationBarTitleDisplayMode(.inline)
     }
 }
 
@@ -36,6 +37,7 @@ struct MaintenancePersonnelListview: View {
             // Search Bar
             TextField("Search", text: $searchText)
                 .padding(10)
+              
                 .background(Color.white)
                 .cornerRadius(10)
                 .padding(.horizontal)
@@ -67,7 +69,7 @@ struct MaintenancePersonnelListview: View {
                 .onDelete(perform: deletePerson)
             }
             .listStyle(PlainListStyle())
-        }
+        }.padding(.top,20)
         .background(Color(.systemGray6))
     }
 
