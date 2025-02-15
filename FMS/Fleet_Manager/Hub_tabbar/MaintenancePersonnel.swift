@@ -34,7 +34,7 @@ struct MaintenancePersonnelListview: View {
 
     var body: some View {
         VStack {
-            // Search Bar
+           
             TextField("Search", text: $searchText)
                 .padding(10)
               
@@ -42,7 +42,7 @@ struct MaintenancePersonnelListview: View {
                 .cornerRadius(10)
                 .padding(.horizontal)
 
-            // Maintenance List
+        
             List {
                 ForEach(maintenanceList.filter { searchText.isEmpty || $0.name.localizedCaseInsensitiveContains(searchText) || $0.email.localizedCaseInsensitiveContains(searchText) }) { person in
                     HStack {
@@ -74,7 +74,6 @@ struct MaintenancePersonnelListview: View {
     }
 
     private func deletePerson(at offsets: IndexSet) {
-        // Make sure to delete the item from the actual data array
         maintenanceList.remove(atOffsets: offsets)
     }
 }

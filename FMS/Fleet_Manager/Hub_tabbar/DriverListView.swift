@@ -1,3 +1,10 @@
+//
+//  MaintenancePersonnel.swift
+//  FMS
+//
+//  Created by Ankush Sharma on 13/02/25.
+//
+
 import SwiftUI
 import FirebaseFirestore
 
@@ -5,7 +12,7 @@ struct DriverListView: View {
     @State private var searchText = ""
     @State var users: [User] = []
     @State private var showAlert = false
-    @State private var userToDelete: User?  // Track the user to delete
+    @State private var userToDelete: User?
 
     let db = Firestore.firestore()
 
@@ -29,20 +36,15 @@ struct DriverListView: View {
 
                 List {
                     ForEach(filteredUsers, id: \.id) { user in
-                        HStack {
+                        NavigationLink(destination: DriverDetails(user: user)) {
                             DriverRow(user: user)
-                            
-                            Spacer()
-                            
-                           
                         }
-                        .padding(.vertical, 5)
                     }
                     .onDelete(perform: confirmDelete)
                 }
                 .listStyle(PlainListStyle())
-            }.padding(.top,30)
-//            .navigationTitle("Drivers")
+            }
+            .padding(.top, 30)
             .onAppear(perform: fetchUsersDriver)
             .alert(isPresented: $showAlert) {
                 Alert(
@@ -56,8 +58,9 @@ struct DriverListView: View {
                     secondaryButton: .cancel()
                 )
             }
-        }.navigationTitle("Drivers")
+            .navigationTitle("Drivers")
             .navigationBarTitleDisplayMode(.inline)
+        }
     }
 
     func fetchUsersDriver() {
@@ -72,6 +75,7 @@ struct DriverListView: View {
             }
         }
     }
+
     func confirmDelete(at offsets: IndexSet) {
         if let index = offsets.first {
             userToDelete = users[index]
@@ -85,7 +89,7 @@ struct DriverListView: View {
                 print("Error deleting user: \(error.localizedDescription)")
             } else {
                 DispatchQueue.main.async {
-                    self.users.removeAll { $0.id == user.id }  // Remove from UI
+                    self.users.removeAll { $0.id == user.id }
                 }
             }
         }
@@ -100,39 +104,31 @@ struct DriverRow: View {
             Image(systemName: "person.crop.circle.fill")
                 .foregroundColor(.black)
                 .font(.largeTitle)
-                .padding(.top,-50)
 
             VStack(alignment: .leading, spacing: 5) {
-                VStack{
-                    Text(user.name)
-                        .font(.headline)
-                        .bold()
-                        .foregroundColor(.black)
-//                        .padding(.leading,-20)
-                    Text(user.phone)
-                        .font(.subheadline)
-                        .foregroundColor(.black)
-                        .padding(.leading,-8)
-                }
-                .padding(.leading,10)
-                .padding(.top,-10)
-                
-                VStack{
-                    Text("Experience: \(user.name)")
-                        .font(.footnote)
-                        .foregroundColor(.black)
-                        .padding(.leading,-115)
-                    Text("Terrain specialization: +91\(user.name)")
-                        .font(.footnote)
-                        .foregroundColor(.black)
-                        .padding(.leading,-35)
-                }
-                
+                Text(user.name)
+                    .font(.headline)
+                    .bold()
+                    .foregroundColor(.black)
+
+                Text(user.phone)
+                    .font(.subheadline)
+                    .foregroundColor(.black)
+
+                Text("Experience: \(user.name)")
+                    .font(.footnote)
+                    .foregroundColor(.black)
+
+                Text("Terrain specialization: \(user.name)")
+                    .font(.footnote)
+                    .foregroundColor(.black)
             }
+            .padding(.leading, 10)
+
             Spacer()
-        }.frame(height: 100)
+        }
+        .frame(height: 100)
         .padding()
-        .padding(.top,28)
         .background(Color(.systemGray6))
         .cornerRadius(10)
     }
