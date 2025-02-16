@@ -12,6 +12,7 @@ struct DriverListView: View {
     @State private var searchText = ""
     @State var users: [User] = []
     @State private var showAlert = false
+    @State private var showDeleteSuccessAlert = false
     @State private var userToDelete: User?
 
     let db = Firestore.firestore()
@@ -58,6 +59,13 @@ struct DriverListView: View {
                     secondaryButton: .cancel()
                 )
             }
+            .alert(isPresented: $showDeleteSuccessAlert) {
+                Alert(
+                    title: Text("Success"),
+                    message: Text("User deleted successfully."),
+                    dismissButton: .default(Text("OK"))
+                )
+            }
             .navigationTitle("Drivers")
             .navigationBarTitleDisplayMode(.inline)
         }
@@ -90,6 +98,7 @@ struct DriverListView: View {
             } else {
                 DispatchQueue.main.async {
                     self.users.removeAll { $0.id == user.id }
+                    self.showDeleteSuccessAlert = true // Show success alert
                 }
             }
         }

@@ -8,30 +8,56 @@ struct LoginView: View {
     @State private var isPasswordVisible: Bool = false
     @State private var isPageChanging: Bool = false
     @State private var userRole: Role? = nil
+    @State private var showAlert: Bool = false
+    @State private var alertMessage: String = ""
 
     func HandleLogin() {
         print("Function started")
         
         let db = Firestore.firestore()
         
-        db.collection("users").getDocuments() { (querySnapshot, err) in
-            if err != nil {
-                print(err?.localizedDescription ?? "error here")
-            } else {
-                for doc in querySnapshot!.documents {
-                    let data = doc.data()
-                    if let dataEmail = data["email"], let dataPassword = data["password"]{
-                        if dataEmail as! String == self.email && dataPassword as! String == self.password {
-                            if let roleString = data["role"] as? String, let role = Role(rawValue: roleString) {
-                                self.userRole = role
+        db.collection("users").getDocuments { (querySnapshot, err) in
+            if let err = err {
+                print(err.localizedDescription)
+                alertMessage = "An error occurred. Please try again."
+                showAlert = true
+                return
+            }
+
+            guard let documents = querySnapshot?.documents else {
+                alertMessage = "Invalid email or password."
+                showAlert = true
+                return
+            }
+            
+            for doc in documents {
+                let data = doc.data()
+                if let dataEmail = data["email"] as? String,
+                   let dataPassword = data["password"] as? String,
+                   dataEmail == self.email,
+                   dataPassword == self.password {
+
+                    if let roleString = data["role"] as? String,
+                       let role = Role(rawValue: roleString) {
+                        self.userRole = role
+                        
+                        // Show success message before redirecting
+                        DispatchQueue.main.async {
+                            alertMessage = "Logged In Successfully!"
+                            showAlert = true
+
+                            // Delay before navigation
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                                 self.isPageChanging = true
                             }
-                            return // Exit the loop once a match is found
                         }
                     }
+                    return
                 }
-                print("Login Failed")
             }
+            
+            alertMessage = "Invalid email or password."
+            showAlert = true
         }
         
         print("Function ended")
@@ -99,11 +125,11 @@ struct LoginView: View {
                 HStack {
                     Spacer()
                     NavigationLink(destination: ForgetPassword()) {
-                                            Text("Forgot Password?")
-                                                .font(.system(size: 18))
-                                                .foregroundColor(.blue)
-                                                .padding(.trailing)
-                                        }
+                        Text("Forgot Password?")
+                            .font(.system(size: 18))
+                            .foregroundColor(.blue)
+                            .padding(.trailing)
+                    }
                 }
                 
                 // Sign In Button
@@ -127,11 +153,13 @@ struct LoginView: View {
                 .disabled(email.isEmpty || password.isEmpty || viewModel.isLoading)
                 .opacity((email.isEmpty || password.isEmpty) ? 0.5 : 1)
                 
-                
                 Spacer()
             }
             .padding(.horizontal, 24)
             .padding(.top, 40)
+            .alert(isPresented: $showAlert) {
+                Alert(title: Text(alertMessage))
+            }
             .navigationDestination(isPresented: self.$isPageChanging) {
                 if let role = userRole {
                     switch role {
@@ -149,9 +177,4 @@ struct LoginView: View {
             }
         }
     }
-}
-
-#Preview {
-//    LoginView()
-    
 }
