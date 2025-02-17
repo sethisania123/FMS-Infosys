@@ -31,7 +31,7 @@ struct hubTabBar: View {
     let db = Firestore.firestore()
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     
