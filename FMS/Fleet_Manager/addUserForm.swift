@@ -253,6 +253,7 @@ struct AddUserView: View {
                 }
             }
             .navigationTitle("Add New User")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(Color.white, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
         }
