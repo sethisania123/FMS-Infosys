@@ -70,15 +70,20 @@ struct ShowVehicleListView: View {
             } else {
                 // Display the list of vehicles once data is fetched
                 List(vehicles) { vehicle in
-                    VStack(alignment: .leading) {
-                        Text(vehicle.model)
-                            .font(.headline)
-                        Text("Type: \(vehicle.type.rawValue)")
-                            .font(.subheadline)
-                        Text("Mileage: \(vehicle.mileage) km")
-                            .font(.subheadline)
+                    NavigationLink(destination: VehicleDetailsView(vehicle: vehicle)) {
+                        VStack(alignment: .leading) {
+                            Text(vehicle.model)
+                                .foregroundColor(.black)
+                                .font(.headline)
+                            Text("Type: \(vehicle.type.rawValue)")
+                                .font(.subheadline)
+                            Text("Mileage: \(vehicle.mileage) km")
+                                .font(.subheadline)
+                        }
+                        .padding(.vertical, 5)
+                        .cornerRadius(10)
+                        .shadow(radius: 5)
                     }
-                    .padding(.vertical, 5)
                 }
             }
         }
