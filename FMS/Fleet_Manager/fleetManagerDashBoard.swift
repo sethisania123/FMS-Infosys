@@ -41,7 +41,7 @@ struct FleetControlDashboard: View {
                     Label("Hub", systemImage: "square.stack.3d.up")
                 }
             
-            Text("Map View")
+            TripListView()
                 .tabItem {
                     Label("Trips", systemImage: "map.fill")
                 }

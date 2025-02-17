@@ -8,23 +8,8 @@
 import SwiftUI
 import FirebaseFirestore
 
-//------------------------------------------------
-// Example Structs
-//------------------------------------------------
-
-struct Vehicle3: Identifiable {
-    let id = UUID()
-    let name: String
-    let number: String
-    let status: String
-    let image: UIImage
-    let statusColor: Color
-}
 
 
-//------------------------------------------------
-// Main View
-//------------------------------------------------
 
 struct hubTabBar: View {
     @State var users: [User] = []
@@ -78,9 +63,6 @@ struct hubTabBar: View {
     }
 }
 
-//------------------------------------------------
-// Section Header Component
-//------------------------------------------------
 
 struct SectionHeader<Destination: View>: View {
     var title: String
@@ -102,14 +84,32 @@ struct SectionHeader<Destination: View>: View {
     }
 }
 
-//------------------------------------------------
-// Vehicle List Component
-//------------------------------------------------
+
 
 struct VehicleList: View {
     let vehicles = [
-        Vehicle3(name: "Bharat Benz 2019", number: "PB 62 AB 0987", status: "Active", image: UIImage(named: "Freightliner_M2_106_6x4_2014_(14240376744)") ?? UIImage(), statusColor: .green),
-        Vehicle3(name: "Bharat Benz 2020", number: "PB 62 AB 0001", status: "Maintenance", image: UIImage(named: "Freightliner_M2_106_6x4_2014_(14240376744)") ?? UIImage(), statusColor: .yellow)
+        Vehicle(
+            type: .car,
+            model: "Tesla Model 3",
+            registrationNumber: "ABC1234",
+            fuelType: .electric,
+            mileage: 12000.5,
+            rc: "RC123456789",
+            vehicleImage: "Freightliner_M2_106_6x4_2014_(14240376744)",
+            insurance: "Insured until 2026",
+            pollution: "Euro 6",
+            status: true),
+        Vehicle(
+            type: .car,
+            model: "Tesla Model 3",
+            registrationNumber: "ABC1234",
+            fuelType: .electric,
+            mileage: 12000.5,
+            rc: "RC123456789",
+            vehicleImage: "Freightliner_M2_106_6x4_2014_(14240376744)",
+            insurance: "Insured until 2026",
+            pollution: "Euro 6",
+            status: true)
     ]
     
     var body: some View {
@@ -123,44 +123,51 @@ struct VehicleList: View {
 }
 
 struct VehicleCard: View {
-    var vehicle: Vehicle3
+    var vehicle: Vehicle
     
     var body: some View {
         HStack(spacing: 12) {
-            Image(uiImage: vehicle.image)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 100, height: 100)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
+            // Display vehicle image from URL
+            AsyncImage(url: URL(string: vehicle.vehicleImage)) { image in
+                image
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 100, height: 100)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+            } placeholder: {
+                Color.gray
+                    .frame(width: 100, height: 100)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+            }
             
             VStack(alignment: .leading, spacing: 4) {
-                Text(vehicle.name)
+                Text(vehicle.model)
                     .font(.headline)
-                Text(vehicle.number)
+                Text(vehicle.registrationNumber)
                     .font(.subheadline)
                     .foregroundColor(.gray)
                 
                 HStack {
+                    // Display status as a circle with color
                     Circle()
-                        .fill(vehicle.statusColor)
+                        .fill(vehicle.status ? Color.green : Color.red)
                         .frame(width: 8, height: 8)
-                    Text(vehicle.status)
+                    
+                    Text(vehicle.status ? "Active" : "Inactive")
                         .font(.caption)
                         .foregroundColor(.gray)
                 }
             }
+            
             Spacer()
         }
-        
+        .padding()  // Add padding to make the card look nicer
         .background(Color(.systemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .shadow(color: Color.black.opacity(0.1), radius: 3)
     }
 }
 
-//------------------------------------------------
-// Driver List Component
-//------------------------------------------------
 
 struct DriverList: View {
     var filteredUsers: [User]
@@ -220,10 +227,6 @@ struct DriverCard: View {
         .shadow(color: Color.black.opacity(0.1), radius: 3)
     }
 }
-
-//------------------------------------------------
-// Preview
-//------------------------------------------------
 
 struct MaintenancePersonnelLists: View {
     @State private var maintenanceList = [
