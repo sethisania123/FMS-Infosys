@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-//Example not officail
+//Example not officail //
 ///--------------------------------
 class Trippp {
     var tripDate: Date
@@ -78,7 +78,7 @@ struct FleetControlDashboard: View {
                     Label("Trips", systemImage: "map.fill")
                 }
             
-            fleetProfileView()
+            FleetProfileView()
                 .tabItem {
                     Label("Profile", systemImage: "person.fill")
                 }
