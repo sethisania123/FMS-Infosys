@@ -41,6 +41,10 @@ struct LoginView: View {
                        let role = Role(rawValue: roleString) {
                         self.userRole = role
                         
+                        let userUUID = doc.documentID
+                        UserDefaults.standard.set(userUUID, forKey: "loggedInUserUUID")
+                                           // uuid store krwa li h
+
                         // Show success message before redirecting
                         DispatchQueue.main.async {
                             alertMessage = "Logged In Successfully!"

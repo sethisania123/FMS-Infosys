@@ -9,7 +9,7 @@ import SwiftUI
 import Cloudinary
 import SwiftSMTP
 
-func sendEmail(to email: String, completion: @escaping (Bool, String) -> Void) {
+func sendEmail(to email: String, password: String, completion: @escaping (Bool, String) -> Void) {
     let smtp = SMTP(
         hostname: "smtp.gmail.com",  // Change this for Outlook, Yahoo, etc.
         email: "sohamchakraborty18.edu@gmail.com",  // Replace with your sender email
@@ -22,11 +22,19 @@ func sendEmail(to email: String, completion: @escaping (Bool, String) -> Void) {
     let to = Mail.User(name: "User", email: email)
 
     let mail = Mail(
-        from: from,
-        to: [to],
-        subject: "Your Login Credentials",
-        text: "The login credentials for your account are as follows:\n\nEmail: \(email)\nPassword: \(UUID().uuidString)"
-    )
+                from: from,
+                to: [to],
+                subject: "Your Login Credentials",
+                text: """
+                The login credentials for your account are as follows:
+                
+                Email: \(email)
+                Password: \(password)
+                
+                Best regards,
+                Team 5
+                """
+            )
 
     smtp.send(mail) { error in
         if let error = error {
@@ -245,6 +253,7 @@ struct AddUserView: View {
                 }
             }
             .navigationTitle("Add New User")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(Color.white, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
         }
@@ -315,7 +324,7 @@ struct AddUserView: View {
         
         // Send email with credentials
 //        sendEmail(to: self.email, name: self.name, password: generatedPassword)
-        sendEmail(to: self.email) { success, message in
+        sendEmail(to: self.email, password: generatedPassword) { success, message in
             DispatchQueue.main.async {
                 self.isLoading = false
                 self.alertMessage = message

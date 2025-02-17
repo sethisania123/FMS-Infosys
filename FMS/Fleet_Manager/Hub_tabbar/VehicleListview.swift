@@ -113,9 +113,8 @@ struct VehicleListView: View {
                 List {
                    
                     ForEach(filteredVehicles) { vehicle in
-                        NavigationLink(destination:VehicleDetailsView())
-                        {
-                            
+          NavigationLink(destination: VehicleDetailsView()){
+
                             HStack {
                                 Image(systemName: "car.fill")
                                     .foregroundColor(.gray)

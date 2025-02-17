@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-//Example not officail
+//Example not officail //
 ///--------------------------------
 class Trippp {
     var tripDate: Date
@@ -78,7 +78,7 @@ struct FleetControlDashboard: View {
                     Label("Trips", systemImage: "map.fill")
                 }
             
-            fleetProfileView()
+            FleetProfileView()
                 .tabItem {
                     Label("Profile", systemImage: "person.fill")
                 }
@@ -98,7 +98,7 @@ struct DashboardView: View {
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
                         InfoCard(icon: "truck.box.fill", value: "48", title: "Total Vehicles", color: .blue)
                         InfoCard(icon: "map.fill", value: "23", title: "Active Trips", color: .green)
-                        InfoCard(icon: "person.3.fill", value: "32", title: "Maintenance Personnel", color: .purple)
+                        MainteneceInfoCard(icon: "person.3.fill", value: "32", title: "Maintenance Personnel", color: .purple)
                         InfoCard(icon: "person.crop.circle.fill", value: "45", title: "Total Drivers", color: .orange)
                     }
                     .padding(.horizontal)
@@ -109,8 +109,13 @@ struct DashboardView: View {
                         .padding(.horizontal)
                     
                     HStack(spacing: 12) {
-                        ActionButton(icon: "map", title: "Create Trip", color: .blue)
-                        ActionButton(icon: "truck.box.fill", title: "Add Vehicle", color: .blue)
+                        NavigationLink(destination: AddNewTripView()) {
+                            ActionButton(icon: "map", title: "Create Trip", color: .blue)
+                        }
+                        NavigationLink(destination: AddNewVehicle()) {
+                            ActionButton(icon: "truck.box.fill", title: "Add Vehicle", color: .blue)
+                        }
+                        
                         NavigationLink(destination: AddUserForm()) {
                             ActionButton(icon: "person.badge.plus", title: "Add User", color: .purple)
                         }
@@ -189,7 +194,50 @@ struct InfoCard: View {
                         Image(systemName: icon)
                             .font(.title2)
                             .foregroundColor(.white) // Icon color inside the circle
-                    }
+                    }.padding(.leading,-80)
+                    
+                    // Title and value aligned to the left
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(value)
+                            .font(.title)
+                            .bold()
+                        
+                        Text(title)
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                    }.padding(.leading,-80)
+                    
+                    Spacer() // Keeps the content to the left
+                }
+            }
+            .padding(.top, 16)
+            .padding(.leading, 14) // This ensures the left padding for all the content
+        }
+        .frame(maxWidth: .infinity, minHeight: 100)
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+    }
+}
+struct MainteneceInfoCard: View {
+    let icon: String
+    let value: String
+    let title: String
+    let color: Color
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .top, spacing: 12) {
+                // Circle behind the image
+                VStack{
+                    ZStack {
+                        Circle()
+                            .fill(color)
+                            .frame(width: 40, height: 40) // Adjust size of the circle
+                        Image(systemName: icon)
+                            .font(.title2)
+                            .foregroundColor(.white) // Icon color inside the circle
+                    }.padding(.leading,-80)
                     
                     // Title and value aligned to the left
                     VStack(alignment: .leading, spacing: 4) {
