@@ -40,7 +40,7 @@ func sendEmail(to email: String, password: String, completion: @escaping (Bool, 
         if let error = error {
             completion(false, "Error sending email: \(error.localizedDescription)")
         } else {
-            completion(true, "OTP sent successfully to \(email)")
+            completion(true, "Login credentials sent successfully to \(email)")
         }
     }
 }
@@ -67,6 +67,8 @@ struct AddUserView: View {
     @State private var licensePhoto: UIImage? = nil
     @State private var isShowingImagePicker = false
     @State private var isFormValid = false
+    @State private var nameError: String? = nil
+    @State private var phoneError: String? = nil
     
     @State private var showingAlert = false
     @State private var alertMessage = ""
@@ -158,6 +160,13 @@ struct AddUserView: View {
                     Section(header: Text("Name").font(.headline)
                         .padding(.leading, -22)) {
                             TextField("Enter your name", text: $name)
+                                .onChange(of: name) { newValue in
+                                if !newValue.isEmpty && !isValidName(newValue) {
+                                    nameError = "Name should only contain letters"
+                                } else {
+                                    nameError = nil
+                                       }
+                                }
                                 .padding(5)
                                 .background(Color.clear)
                                 .frame(height: 47)
@@ -167,6 +176,11 @@ struct AddUserView: View {
                                         .stroke(Color.gray, lineWidth: 1)
                                 )
                                 .frame(width:361)
+                            if let error = nameError {
+                                Text(error)
+                                .foregroundColor(.red)
+                                .font(.caption)
+                            }
                         }
                     
                     Section(header: Text("Email").font(.headline).padding(.leading, -22)) {
@@ -186,6 +200,17 @@ struct AddUserView: View {
                     
                     Section(header: Text("Contact Number").font(.headline).padding(.leading, -22)) {
                         TextField("Enter contact number", text: $contactNumber)
+                            .onChange(of: contactNumber) { newValue in
+                                if !newValue.isEmpty && !isValidPhone(newValue) {
+                                    phoneError = "Phone number should be 10 digits"
+                                } else {
+                                    phoneError = nil
+                            }
+                            contactNumber = newValue.filter { "0123456789".contains($0) }
+                            if contactNumber.count > 10 {
+                                contactNumber = String(contactNumber.prefix(10))
+                                }
+                            }
                             .keyboardType(.phonePad)
                             .padding(5)
                             .background(Color.clear)
@@ -196,6 +221,11 @@ struct AddUserView: View {
                                     .stroke(Color.gray, lineWidth: 1)
                             )
                             .frame(width:361)
+                            if let error = phoneError {
+                                Text(error)
+                                .foregroundColor(.red)
+                                .font(.caption)
+                            }
                     }
                     
                     if selectedRole == "Driver" {
@@ -269,6 +299,17 @@ struct AddUserView: View {
         }
     }
     
+    private func isValidName(_ name: String) -> Bool {
+            let nameRegex = "^[a-zA-Z ]+$"
+            let namePredicate = NSPredicate(format: "SELF MATCHES %@", nameRegex)
+            return namePredicate.evaluate(with: name)
+        }
+        
+    private func isValidPhone(_ phone: String) -> Bool {
+            let phoneRegex = "^[0-9]{10}$"
+            let phonePredicate = NSPredicate(format: "SELF MATCHES %@", phoneRegex)
+            return phonePredicate.evaluate(with: phone)
+        }
     private func generateSecurePassword() -> String {
         let length = 12
         let characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*"
