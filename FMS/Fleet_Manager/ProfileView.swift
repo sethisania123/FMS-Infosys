@@ -87,6 +87,9 @@ struct FleetProfileView: View {
     @State private var isEditing = false
     @State private var animateEditIcon = false
     
+    @State private var showAlert: Bool = false
+    @State private var showEditView = false
+    
     var body: some View {
         NavigationView {
             VStack {
@@ -140,21 +143,17 @@ struct FleetProfileView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color.gray.opacity(0.2))
-            .navigationBarTitle("Profile", displayMode: .inline)
-            .navigationBarItems(trailing: Button(action: {
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    isEditing.toggle()
-                    animateEditIcon.toggle()
+            .navigationBarTitle("Profile")
+           
+            .navigationBarItems(
+                    trailing: Button("Edit") {
+                        showEditView.toggle()
+                    }
+                )
+                .sheet(isPresented: $showEditView) {
+                    editfromfleetmanager(userData: $userData)
                 }
-            }) {
-                Image(systemName: isEditing ? "checkmark.circle.fill" : "pencil.circle.fill")
-                    .resizable()
-                    .frame(width: 28, height: 28)
-                    .foregroundColor(isEditing ? .green : .blue)
-                    .rotationEffect(.degrees(animateEditIcon ? 360 : 0))
-                    .scaleEffect(animateEditIcon ? 1.3 : 1.0)
-                    .shadow(radius: 3)
-            })
+            
             .onAppear {
                 fetchUserProfile()
             }
@@ -202,11 +201,11 @@ struct ContactInfoCard: View {
                     get: { userData["phone"] as? String ?? "8235205048" },
                     set: { userData["phone"] = $0 }
                 ))
-                .textFieldStyle(RoundedBorderTextFieldStyle())
+//                .textFieldStyle(RoundedBorderTextFieldStyle())
                 .background(Color.white)
                 .cornerRadius(8)
                 .disabled(!isEditing)
-                .shadow(radius: 2)
+//                .shadow(radius: 2)
             }
             .padding(.vertical, 5)
             
