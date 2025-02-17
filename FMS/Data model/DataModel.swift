@@ -97,14 +97,14 @@ class Vehicle: Codable, Identifiable {
     var model: String
     var registrationNumber: String
     var fuelType: FuelType
-    var mileage: Float
+    var mileage: Int
     var rc: String
     var vehicleImage: String
     var insurance: String
     var pollution: String
     var status: Bool
     
-    init(type: VehicleType, model: String, registrationNumber: String, fuelType: FuelType, mileage: Float, rc: String, vehicleImage: String, insurance: String, pollution: String, status: Bool) {
+    init(type: VehicleType, model: String, registrationNumber: String, fuelType: FuelType, mileage: Int, rc: String, vehicleImage: String, insurance: String, pollution: String, status: Bool) {
         self.type = type
         self.model = model
         self.registrationNumber = registrationNumber
@@ -126,7 +126,7 @@ class Vehicle: Codable, Identifiable {
         self.model = try values.decode(String.self, forKey: .model)
         self.registrationNumber = try values.decode(String.self, forKey: .registrationNumber)
         self.fuelType = try values.decode(FuelType.self, forKey: .fuelType)
-        self.mileage = try values.decode(Float.self, forKey: .mileage)
+        self.mileage = try values.decode(Int.self, forKey: .mileage)
         self.rc = try values.decode(String.self, forKey: .rc)
         self.vehicleImage = try values.decode(String.self, forKey: .vehicleImage)
         self.insurance = try values.decode(String.self, forKey: .insurance)

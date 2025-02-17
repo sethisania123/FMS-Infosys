@@ -194,7 +194,7 @@ struct AddNewVehicle: View {
             model: model,
             registrationNumber: registrationNumber,
             fuelType: FuelType(rawValue: fuelType) ?? .petrol,
-            mileage: Float(mileage) ?? 0.0,
+            mileage: Int(mileage) ?? 0,
             rc: "",
             vehicleImage: "",
             insurance: "",
