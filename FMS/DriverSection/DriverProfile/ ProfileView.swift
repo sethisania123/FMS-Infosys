@@ -6,8 +6,12 @@
 //
 
 import SwiftUI
+import FirebaseFirestore
 
 struct ProfileView: View {
+    @State private var userData: [String: Any] = [:]
+    @State private var userUUID: String? = UserDefaults.standard.string(forKey: "loggedInUserUUID")
+    
     @State private var isEditing = false
     @State private var name = "John Anderson"
     @State private var email = "john.anderson@company.com" // Read-only
@@ -18,9 +22,11 @@ struct ProfileView: View {
     @State private var licenseImage: UIImage? = nil // Placeholder for license image
 
     var body: some View {
+        
+        
         VStack(spacing: 20) {
             // Centered Name at the Top
-            Text(name)
+            Text(userData["name"] as? String ?? "John Anderson")
                 .font(.largeTitle)
                 .bold()
                 .foregroundColor(.black)
@@ -86,6 +92,33 @@ struct ProfileView: View {
         .padding()
         .background(Color.gray.opacity(0.1)) // Light gray background for better contrast
         .navigationBarHidden(true) // Hide default navigation bar
+        .onAppear(
+            perform: fetchUserProfile
+        )
+    }
+    
+    func fetchUserProfile() {
+        guard let userUUID = userUUID else {
+            print("No user UUID found")
+            return
+        }
+        
+        print("User UUID: \(userUUID)")
+        let db = Firestore.firestore()
+        db.collection("users").document(userUUID).getDocument { (document, error) in
+            if let document = document, document.exists {
+                DispatchQueue.main.async {
+                    self.userData = document.data() ?? [:]
+                    phone = userData["phone"] as? String ?? "John Anderson"
+                    email = userData["email"] as? String ?? "John Anderson"
+                    experience = userData["experience"] as? String ?? "John Anderson"
+                    vehicleType = userData["selectedVehicle"] as? String ?? "John Anderson"
+                    specializedTerrain = userData["selectedTerrain"] as? String ?? "Plain"
+                }
+            } else {
+                print("User not found")
+            }
+        }
     }
 }
 
