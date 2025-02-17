@@ -6,7 +6,7 @@
 //
 import SwiftUI
 
-// Example trips for testing
+
 func generateExampleTrips() -> [Trip] {
     let driver1 = Driver(name: "John Doe", email: "john@example.com", phone: "123-456-7890", experience: .moreThanFive, license: "D12345", geoPreference: .plain, vehiclePreference: .truck, status: true)
 

@@ -86,10 +86,16 @@ struct DriverListView: View {
 
     func confirmDelete(at offsets: IndexSet) {
         if let index = offsets.first {
-            userToDelete = users[index]
-            showAlert = true
+            let user = users[index]
+            if user.id != nil {  // Ensure valid ID
+                userToDelete = user
+                showAlert = true
+            } else {
+                print("User ID is nil, cannot delete")
+            }
         }
     }
+
 
     func deleteUser(_ user: User) {
         db.collection("users").document(user.id ?? "").delete { error in
