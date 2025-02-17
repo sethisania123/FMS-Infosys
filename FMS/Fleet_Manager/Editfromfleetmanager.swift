@@ -10,6 +10,7 @@ import FirebaseFirestore
 struct editfromfleetmanager: View {
     @Binding var userData: [String: Any]
     @Environment(\.presentationMode) var presentationMode
+    @State private var showAlert : Bool = false
     
     @State private var name: String = ""
     @State private var email: String = ""
@@ -64,11 +65,23 @@ struct editfromfleetmanager: View {
                 trailing: Button("Save") {
                     saveUserData()
                     presentationMode.wrappedValue.dismiss()
+                    showAlert = true
                 }
             )
             .onAppear {
                 loadUserData()
             }
+            .alert(isPresented: $showAlert) {
+                           Alert(
+                               title: Text("Confirm Changes"),
+                               message: Text("Are you sure you want to save these changes?"),
+                               primaryButton: .default(Text("Yes")) {
+                                   saveUserData()
+                                   presentationMode.wrappedValue.dismiss()
+                               },
+                               secondaryButton: .cancel()
+                           )
+                       }
         }
     }
     
@@ -103,6 +116,7 @@ struct editfromfleetmanager: View {
             }
         }
     }
+        
 }
 
 // MARK: - Preview with Mock Data

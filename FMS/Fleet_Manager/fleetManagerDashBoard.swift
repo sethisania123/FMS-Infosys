@@ -92,9 +92,9 @@ struct DashboardView: View {
                         Text("Recent Activities")
                             .font(.headline)
                             .padding(.horizontal)
-                        Spacer()
+//                        Spacer()
                         Text("See all")
-                            .padding(.leading,-20)
+                            .padding(.leading,150)
                             .font(.system(size: 15))
                             .foregroundColor(.blue)
                     }
@@ -172,7 +172,7 @@ struct TripCardView: View {
             }
 
             Rectangle()
-                .frame(maxWidth: .infinity)
+                .frame(maxWidth: .infinity,maxHeight: 1)
                 .foregroundColor(.gray)
                 .opacity(0.5)
 
