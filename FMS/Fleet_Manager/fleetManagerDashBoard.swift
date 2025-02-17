@@ -110,7 +110,10 @@ struct DashboardView: View {
                     
                     HStack(spacing: 12) {
                         ActionButton(icon: "map", title: "Create Trip", color: .blue)
-                        ActionButton(icon: "truck.box.fill", title: "Add Vehicle", color: .blue)
+                        NavigationLink(destination: AddNewVehicle()) {
+                            ActionButton(icon: "truck.box.fill", title: "Add Vehicle", color: .blue)
+                        }
+                        
                         NavigationLink(destination: AddUserForm()) {
                             ActionButton(icon: "person.badge.plus", title: "Add User", color: .purple)
                         }

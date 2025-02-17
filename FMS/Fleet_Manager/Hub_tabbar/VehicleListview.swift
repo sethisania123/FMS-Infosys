@@ -112,21 +112,23 @@ struct VehicleListView: View {
                 // Vehicle List
                 List {
                     ForEach(filteredVehicles) { vehicle in
-                        HStack {
-                            Image(systemName: "car.fill")
-                                .foregroundColor(.gray)
-                            VStack(alignment: .leading) {
-                                Text(vehicle.name)
-                                    .font(.headline)
-                                Text(vehicle.type)
-                                    .font(.subheadline)
+                        NavigationLink(destination: VehicleDetailsView()){
+                            HStack {
+                                Image(systemName: "car.fill")
                                     .foregroundColor(.gray)
+                                VStack(alignment: .leading) {
+                                    Text(vehicle.name)
+                                        .font(.headline)
+                                    Text(vehicle.type)
+                                        .font(.subheadline)
+                                        .foregroundColor(.gray)
+                                }
+                                Spacer()
+                                Text(vehicle.status)
+                                    .foregroundColor(vehicle.status == "Active" ? .green : .red)
                             }
-                            Spacer()
-                            Text(vehicle.status)
-                                .foregroundColor(vehicle.status == "Active" ? .green : .red)
+                            .padding(.vertical, 5)
                         }
-                        .padding(.vertical, 5)
                     }
                     .onDelete(perform: deleteVehicle)
                 }
