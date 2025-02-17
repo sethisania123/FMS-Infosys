@@ -13,7 +13,30 @@ struct ShowVehicleListView: View {
     @State private var vehicles: [Vehicle] = []
     @State private var isLoading = true
     @State private var errorMessage: String?
+    @State private var searchText = ""
+    @State private var selectedVehicleType: VehicleType?
 
+    // Computed property for filtered vehicles
+        private var filteredVehicles: [Vehicle] {
+            var filtered = vehicles
+            
+            // Apply search filter
+            if !searchText.isEmpty {
+                filtered = filtered.filter { vehicle in
+                    vehicle.model.localizedCaseInsensitiveContains(searchText)
+                }
+            }
+            
+            // Apply type filter
+            if let selectedType = selectedVehicleType {
+                filtered = filtered.filter { vehicle in
+                    vehicle.type == selectedType
+                }
+            }
+            
+            return filtered
+        }
+    
     // Fetch vehicles from Firestore when the view appears
     func fetchVehicles() {
         let db = Firestore.firestore()
@@ -55,6 +78,40 @@ struct ShowVehicleListView: View {
         }
     }
 
+    private var filterPicker: some View {
+            Menu {
+                Button(action: { selectedVehicleType = nil }) {
+                    HStack {
+                        Text("All Types")
+                        if selectedVehicleType == nil {
+                            Image(systemName: "checkmark")
+                        }
+                    }
+                }
+                
+                ForEach(VehicleType.allCases, id: \.self) { type in
+                    Button(action: { selectedVehicleType = type }) {
+                        HStack {
+                            Text(type.rawValue)
+                            if selectedVehicleType == type {
+                                Image(systemName: "checkmark")
+                            }
+                        }
+                    }
+                }
+            } label: {
+                HStack {
+                    Image(systemName: "line.3.horizontal.decrease.circle")
+                        .foregroundColor(.blue)
+                    Text(selectedVehicleType?.rawValue ?? "Filter")
+                        .foregroundColor(.blue)
+                }
+                .padding(8)
+                .background(Color.blue.opacity(0.1))
+                .cornerRadius(8)
+            }
+        }
+    
     // Load data when the view appears
     var body: some View {
         VStack {
@@ -68,8 +125,15 @@ struct ShowVehicleListView: View {
                     .foregroundColor(.red)
                     .padding()
             } else {
+                
+                HStack {
+                        SearchBar(text: $searchText)
+                        filterPicker
+                      }
+                    .padding(.horizontal)
+                
                 // Display the list of vehicles once data is fetched
-                List(vehicles) { vehicle in
+                List(filteredVehicles) { vehicle in
                     NavigationLink(destination: VehicleDetailsView(vehicle: vehicle)) {
                         VStack(alignment: .leading) {
                             Text(vehicle.model)
@@ -93,6 +157,30 @@ struct ShowVehicleListView: View {
         .navigationTitle("Vehicle List")
     }
 }
+
+struct SearchBar: View {
+    @Binding var text: String
+    
+    var body: some View {
+        HStack {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(.gray)
+            
+            TextField("Search vehicles...", text: $text)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+            
+            if !text.isEmpty {
+                Button(action: {
+                    text = ""
+                }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.gray)
+                }
+            }
+        }
+    }
+}
+
 
 #Preview {
     ShowVehicleListView()
