@@ -78,7 +78,7 @@ struct FleetControlDashboard: View {
                     Label("Trips", systemImage: "map.fill")
                 }
             
-            Text("Profile")
+            fleetProfileView()
                 .tabItem {
                     Label("Profile", systemImage: "person.fill")
                 }

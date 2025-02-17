@@ -109,37 +109,45 @@ struct DriverRow: View {
     let user: User
 
     var body: some View {
+        
         HStack {
-            Image(systemName: "person.crop.circle.fill")
-                .foregroundColor(.black)
-                .font(.largeTitle)
+            VStack(alignment: .leading) {
+                HStack(alignment: .top) {
+                    Image(systemName: "person.crop.circle.fill")
+                        .foregroundColor(.black)
+                        .font(.largeTitle)
+                    
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text(user.name)
+                            .font(.headline)
+                            .bold()
+                            .foregroundColor(.black)
+                        
+                        Text(user.phone)
+                            .font(.subheadline)
+                            .foregroundColor(.black)
+                    }
+                }
 
-            VStack(alignment: .leading, spacing: 5) {
-                Text(user.name)
-                    .font(.headline)
-                    .bold()
-                    .foregroundColor(.black)
+                VStack(alignment: .leading) {
+                    Text("Experience: \(user.name)")
+                        .font(.footnote)
+                        .foregroundColor(.black)
 
-                Text(user.phone)
-                    .font(.subheadline)
-                    .foregroundColor(.black)
-
-                Text("Experience: \(user.name)")
-                    .font(.footnote)
-                    .foregroundColor(.black)
-
-                Text("Terrain specialization: \(user.name)")
-                    .font(.footnote)
-                    .foregroundColor(.black)
+                    Text("Terrain specialization: \(user.name)")
+                        .font(.footnote)
+                        .foregroundColor(.black)
+                }
             }
-            .padding(.leading, 10)
-
-            Spacer()
+            .padding(.leading, -55)
         }
-        .frame(height: 100)
+        .frame(width: 300, height: 100)
         .padding()
+        
         .background(Color(.systemGray6))
         .cornerRadius(10)
+
+
     }
 }
 
