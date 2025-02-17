@@ -19,7 +19,7 @@ struct DriverHeaderView: View {
                     .foregroundColor(.gray)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("John Cooper")
+                    Text("Fleet Fly")
                         .font(.headline)
                         .fontWeight(.semibold)
 
