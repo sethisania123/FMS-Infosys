@@ -189,7 +189,7 @@ struct AddNewVehicle: View {
         let db = Firestore.firestore()
         let vehicleRef = db.collection("vehicles").document()
 
-        var newVehicle = Vehicle(
+        let newVehicle = Vehicle(
             type: VehicleType(rawValue: vehicleType) ?? .truck,
             model: model,
             registrationNumber: registrationNumber,
@@ -198,7 +198,8 @@ struct AddNewVehicle: View {
             rc: "",
             vehicleImage: "",
             insurance: "",
-            pollution: ""
+            pollution: "",
+            status: true
         )
 
         let group = DispatchGroup()

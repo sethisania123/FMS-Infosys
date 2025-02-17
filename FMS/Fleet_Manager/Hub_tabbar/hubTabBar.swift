@@ -36,7 +36,7 @@ struct hubTabBar: View {
                 VStack(alignment: .leading, spacing: 16) {
                     
                     // Vehicles Section
-                    SectionHeader(title: "Vehicle", destination: VehicleListView())
+                    SectionHeader(title: "Vehicle", destination: ShowVehicleListView())
                     VehicleList()
                     
                     // Drivers Section

@@ -91,8 +91,8 @@ class Driver: User {
     }
 }
 
-class Vehicle: Codable {
-    @DocumentID var id: String? = UUID().uuidString
+class Vehicle: Codable, Identifiable {
+    @DocumentID var id: String? = UUID().uuidString  // Firestore Document ID
     var type: VehicleType
     var model: String
     var registrationNumber: String
@@ -102,8 +102,9 @@ class Vehicle: Codable {
     var vehicleImage: String
     var insurance: String
     var pollution: String
+    var status: Bool
     
-    init(type: VehicleType, model: String, registrationNumber: String, fuelType: FuelType, mileage: Float, rc: String, vehicleImage: String, insurance: String, pollution: String) {
+    init(type: VehicleType, model: String, registrationNumber: String, fuelType: FuelType, mileage: Float, rc: String, vehicleImage: String, insurance: String, pollution: String, status: Bool) {
         self.type = type
         self.model = model
         self.registrationNumber = registrationNumber
@@ -113,8 +114,49 @@ class Vehicle: Codable {
         self.vehicleImage = vehicleImage
         self.insurance = insurance
         self.pollution = pollution
+        self.status = status
+    }
+
+    // Custom init method to handle Firestore decoding
+    required init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.id = try values.decodeIfPresent(String.self, forKey: .id) ?? UUID().uuidString  // Firestore Document ID
+        self.type = try values.decode(VehicleType.self, forKey: .type)
+        self.model = try values.decode(String.self, forKey: .model)
+        self.registrationNumber = try values.decode(String.self, forKey: .registrationNumber)
+        self.fuelType = try values.decode(FuelType.self, forKey: .fuelType)
+        self.mileage = try values.decode(Float.self, forKey: .mileage)
+        self.rc = try values.decode(String.self, forKey: .rc)
+        self.vehicleImage = try values.decode(String.self, forKey: .vehicleImage)
+        self.insurance = try values.decode(String.self, forKey: .insurance)
+        self.pollution = try values.decode(String.self, forKey: .pollution)
+        
+        // Custom decoding for `status` to handle type mismatch
+        if let statusString = try values.decodeIfPresent(String.self, forKey: .status) {
+            // If it's a string, convert it to Bool (assuming "true" or "false" string values)
+            self.status = (statusString.lowercased() == "true")
+        } else {
+            // If it's not a string, attempt to decode as Bool
+            self.status = try values.decodeIfPresent(Bool.self, forKey: .status) ?? true // Default to true if no value
+        }
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case type
+        case model
+        case registrationNumber
+        case fuelType
+        case mileage
+        case rc
+        case vehicleImage
+        case insurance
+        case pollution
+        case status
     }
 }
+
 
 class Trip: Codable {
     @DocumentID var id: String? = UUID().uuidString
