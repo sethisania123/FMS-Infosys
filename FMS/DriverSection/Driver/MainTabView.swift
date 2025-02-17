@@ -10,11 +10,10 @@ import SwiftUI
 struct MainTabView: View {
     var body: some View {
         TabView {
-            DriverHomeScreen()
-                .tabItem {
-                    Image(systemName: "house.fill")
-                    Text("Home")
-                }
+           HomeView()
+            .tabItem {
+                Label("Home", systemImage: "house.fill")
+            }
             
             NavigationViewScreen()
                 .tabItem {
