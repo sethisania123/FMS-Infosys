@@ -392,5 +392,6 @@ struct TripListView_Previews: PreviewProvider {
     static var previews: some View {
        
         AddNewTripView()
+        
     }
 }
