@@ -88,16 +88,16 @@ struct DashboardView: View {
                     .padding(.horizontal)
     
                    
-                    HStack {
-                        Text("Recent Activities")
-                            .font(.headline)
-                            .padding(.horizontal)
-//                        Spacer()
-                        Text("See all")
-                            .padding(.leading,150)
-                            .font(.system(size: 15))
-                            .foregroundColor(.blue)
-                    }
+//                    HStack {
+//                        Text("Recent Activities")
+//                            .font(.headline)
+//                            .padding(.horizontal)
+////                        Spacer()
+//                        Text("See all")
+//                            .padding(.leading,150)
+//                            .font(.system(size: 15))
+//                            .foregroundColor(.blue)
+//                    }
        
                     ForEach(trips, id: \.id) { trip in
                         TripCardView(trip: trip)

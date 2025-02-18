@@ -73,7 +73,7 @@ struct AddUserView: View {
     @State private var showingAlert = false
     @State private var alertMessage = ""
     @State private var isLoading = false
-    
+  
     let roles = ["Fleet Manager", "Driver", "Maintenance"]
     
     let cloudinary = CLDCloudinary(configuration: CLDConfiguration(cloudName: "dztmc60fg", apiKey: "489983833873463", apiSecret: "UN-I5BTJCTmvx-yGsyMo9i-kpr4"))
@@ -142,7 +142,7 @@ struct AddUserView: View {
     
     
     var body: some View {
-        NavigationView {
+//        NavigationView {
             VStack {
                 Form {
                     Picker("Role", selection: $selectedRole) {
@@ -156,17 +156,38 @@ struct AddUserView: View {
                     .frame(width : 380)
                     .background(Color.clear)
                     .listRowBackground(Color.clear)
-                    
-                    Section(header: Text("Name").font(.headline)
-                        .padding(.leading, -22)) {
-                            TextField("Enter your name", text: $name)
-                                .onChange(of: name) { newValue in
-                                if !newValue.isEmpty && !isValidName(newValue) {
-                                    nameError = "Name should only contain letters"
-                                } else {
-                                    nameError = nil
-                                       }
+                    if selectedRole == "Fleet Manager" {
+                        
+                        Section(header: Text("Name").font(.headline)
+                            .padding(.leading, -22)) {
+                                TextField("Enter your name", text: $name)
+                                    .onChange(of: name) { newValue in
+                                        if !newValue.isEmpty && !isValidName(newValue) {
+                                            nameError = "Name should only contain letters"
+                                        } else {
+                                            nameError = nil
+                                        }
+                                    }
+                                    .padding(5)
+                                    .background(Color.clear)
+                                    .frame(height: 47)
+                                    .listRowBackground(Color.clear)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(Color.gray, lineWidth: 1)
+                                    )
+                                    .frame(width:361)
+                                if let error = nameError {
+                                    Text(error)
+                                        .foregroundColor(.red)
+                                        .font(.caption)
                                 }
+                            }
+                        
+                        Section(header: Text("Email").font(.headline).padding(.leading, -22)) {
+                            TextField("Enter your email", text: $email)
+                                .keyboardType(.emailAddress)
+                                .textInputAutocapitalization(.never)
                                 .padding(5)
                                 .background(Color.clear)
                                 .frame(height: 47)
@@ -176,59 +197,127 @@ struct AddUserView: View {
                                         .stroke(Color.gray, lineWidth: 1)
                                 )
                                 .frame(width:361)
-                            if let error = nameError {
-                                Text(error)
-                                .foregroundColor(.red)
-                                .font(.caption)
-                            }
                         }
-                    
-                    Section(header: Text("Email").font(.headline).padding(.leading, -22)) {
-                        TextField("Enter your email", text: $email)
-                            .keyboardType(.emailAddress)
-                            .textInputAutocapitalization(.never)
-                            .padding(5)
-                            .background(Color.clear)
-                            .frame(height: 47)
-                            .listRowBackground(Color.clear)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(Color.gray, lineWidth: 1)
-                            )
-                            .frame(width:361)
-                    }
-                    
-                    Section(header: Text("Contact Number").font(.headline).padding(.leading, -22)) {
-                        TextField("Enter contact number", text: $contactNumber)
-                            .onChange(of: contactNumber) { newValue in
-                                if !newValue.isEmpty && !isValidPhone(newValue) {
-                                    phoneError = "Phone number should be 10 digits"
-                                } else {
-                                    phoneError = nil
-                            }
-                            contactNumber = newValue.filter { "0123456789".contains($0) }
-                            if contactNumber.count > 10 {
-                                contactNumber = String(contactNumber.prefix(10))
+                        
+                        Section(header: Text("Contact Number").font(.headline).padding(.leading, -22)) {
+                            TextField("Enter contact number", text: $contactNumber)
+                                .onChange(of: contactNumber) { newValue in
+                                    if !newValue.isEmpty && !isValidPhone(newValue) {
+                                        phoneError = "Phone number should be 10 digits"
+                                    } else {
+                                        phoneError = nil
+                                    }
+                                    contactNumber = newValue.filter { "0123456789".contains($0) }
+                                    if contactNumber.count > 10 {
+                                        contactNumber = String(contactNumber.prefix(10))
+                                    }
                                 }
-                            }
-                            .keyboardType(.phonePad)
-                            .padding(5)
-                            .background(Color.clear)
-                            .frame(height: 47)
-                            .listRowBackground(Color.clear)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(Color.gray, lineWidth: 1)
-                            )
-                            .frame(width:361)
+                                .keyboardType(.phonePad)
+                                .padding(5)
+                                .background(Color.clear)
+                                .frame(height: 47)
+                                .listRowBackground(Color.clear)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(Color.gray, lineWidth: 1)
+                                )
+                                .frame(width:361)
                             if let error = phoneError {
                                 Text(error)
-                                .foregroundColor(.red)
-                                .font(.caption)
+                                    .foregroundColor(.red)
+                                    .font(.caption)
                             }
+                        }
+                        Section {
+                            Button(action: {
+                                validateForm()
+                            }) {
+                                Text("Create Account")
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(Color.blue)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(8)
+                            }
+                          
+                            .disabled(isLoading||email.isEmpty || email.isEmpty || contactNumber.isEmpty)
+                            .opacity((email.isEmpty || email.isEmpty || contactNumber.isEmpty) ? 0.5 : 1)
+
+                        }
+                        .listRowBackground(Color.clear)
                     }
                     
                     if selectedRole == "Driver" {
+                        Section(header: Text("Name").font(.headline)
+                            .padding(.leading, -22)) {
+                                TextField("Enter your name", text: $name)
+                                    .onChange(of: name) { newValue in
+                                        if !newValue.isEmpty && !isValidName(newValue) {
+                                            nameError = "Name should only contain letters"
+                                        } else {
+                                            nameError = nil
+                                        }
+                                    }
+                                    .padding(5)
+                                    .background(Color.clear)
+                                    .frame(height: 47)
+                                    .listRowBackground(Color.clear)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(Color.gray, lineWidth: 1)
+                                    )
+                                    .frame(width:361)
+                                if let error = nameError {
+                                    Text(error)
+                                        .foregroundColor(.red)
+                                        .font(.caption)
+                                }
+                            }
+                        
+                        Section(header: Text("Email").font(.headline).padding(.leading, -22)) {
+                            TextField("Enter your email", text: $email)
+                                .keyboardType(.emailAddress)
+                                .textInputAutocapitalization(.never)
+                                .padding(5)
+                                .background(Color.clear)
+                                .frame(height: 47)
+                                .listRowBackground(Color.clear)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(Color.gray, lineWidth: 1)
+                                )
+                                .frame(width:361)
+                        }
+                        
+                        Section(header: Text("Contact Number").font(.headline).padding(.leading, -22)) {
+                            TextField("Enter contact number", text: $contactNumber)
+                                .onChange(of: contactNumber) { newValue in
+                                    if !newValue.isEmpty && !isValidPhone(newValue) {
+                                        phoneError = "Phone number should be 10 digits"
+                                    } else {
+                                        phoneError = nil
+                                    }
+                                    contactNumber = newValue.filter { "0123456789".contains($0) }
+                                    if contactNumber.count > 10 {
+                                        contactNumber = String(contactNumber.prefix(10))
+                                    }
+                                }
+                                .keyboardType(.phonePad)
+                                .padding(5)
+                                .background(Color.clear)
+                                .frame(height: 47)
+                                .listRowBackground(Color.clear)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(Color.gray, lineWidth: 1)
+                                )
+                                .frame(width:361)
+                            if let error = phoneError {
+                                Text(error)
+                                    .foregroundColor(.red)
+                                    .font(.caption)
+                            }
+                        }
                         Section(header: Text("License Photo").font(.headline).padding(.leading, -22)) {
                             Button(action: {
                                 isShowingImagePicker = true
@@ -259,22 +348,116 @@ struct AddUserView: View {
                         Section(header: Text("Specialization in Geo Areas").font(.headline).padding(.leading, -22)) {
                             geoAreaPicker
                         }
+                        Section {
+                            Button(action: {
+//                                validateForm()
+                            }) {
+                                Text("Create Account")
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(Color.blue)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(8)
+                            }
+                            .disabled(isLoading||email.isEmpty || email.isEmpty || contactNumber.isEmpty)
+                            .opacity((email.isEmpty || email.isEmpty || contactNumber.isEmpty) ? 0.5 : 1)
+                        }
+                        .listRowBackground(Color.clear)
+                    }
+                    if selectedRole == "Maintenance" {
+                        
+                        Section(header: Text("Name").font(.headline)
+                            .padding(.leading, -22)) {
+                                TextField("Enter your name", text: $name)
+                                    .onChange(of: name) { newValue in
+                                        if !newValue.isEmpty && !isValidName(newValue) {
+                                            nameError = "Name should only contain letters"
+                                        } else {
+                                            nameError = nil
+                                        }
+                                    }
+                                    .padding(5)
+                                    .background(Color.clear)
+                                    .frame(height: 47)
+                                    .listRowBackground(Color.clear)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(Color.gray, lineWidth: 1)
+                                    )
+                                    .frame(width:361)
+                                if let error = nameError {
+                                    Text(error)
+                                        .foregroundColor(.red)
+                                        .font(.caption)
+                                }
+                            }
+                        
+                        Section(header: Text("Email").font(.headline).padding(.leading, -22)) {
+                            TextField("Enter your email", text: $email)
+                                .keyboardType(.emailAddress)
+                                .textInputAutocapitalization(.never)
+                                .padding(5)
+                                .background(Color.clear)
+                                .frame(height: 47)
+                                .listRowBackground(Color.clear)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(Color.gray, lineWidth: 1)
+                                )
+                                .frame(width:361)
+                        }
+                        
+                        Section(header: Text("Contact Number").font(.headline).padding(.leading, -22)) {
+                            TextField("Enter contact number", text: $contactNumber)
+                                .onChange(of: contactNumber) { newValue in
+                                    if !newValue.isEmpty && !isValidPhone(newValue) {
+                                        phoneError = "Phone number should be 10 digits"
+                                    } else {
+                                        phoneError = nil
+                                    }
+                                    contactNumber = newValue.filter { "0123456789".contains($0) }
+                                    if contactNumber.count > 10 {
+                                        contactNumber = String(contactNumber.prefix(10))
+                                    }
+                                }
+                                .keyboardType(.phonePad)
+                                .padding(5)
+                                .background(Color.clear)
+                                .frame(height: 47)
+                                .listRowBackground(Color.clear)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(Color.gray, lineWidth: 1)
+                                )
+                                .frame(width:361)
+                            if let error = phoneError {
+                                Text(error)
+                                    .foregroundColor(.red)
+                                    .font(.caption)
+                            }
+                        }
+                        
+                        
+                        Section {
+                            Button(action: {
+//                                validateForm()
+                            }) {
+                                Text("Create Account")
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(Color.blue)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(8)
+                            }
+                            .disabled(isLoading||email.isEmpty || email.isEmpty || contactNumber.isEmpty)
+                            .opacity((email.isEmpty || email.isEmpty || contactNumber.isEmpty) ? 0.5 : 1)
+                        }
+                        .listRowBackground(Color.clear)
+                        
                     }
                     
-                    Section {
-                        Button(action: {
-                            validateForm()
-                        }) {
-                            Text("Create Account")
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color.blue)
-                                .foregroundColor(.white)
-                                .cornerRadius(8)
-                        }
-                        .disabled(isLoading)
-                    }
-                    .listRowBackground(Color.clear)
+                    
+                   
                 }
                 
                 if isLoading {
@@ -286,10 +469,12 @@ struct AddUserView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(Color.white, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
-        }
+//        }
         .sheet(isPresented: $isShowingImagePicker) {
             ImagePicker(image: $licensePhoto)
         }
+        
+       
         .alert(isPresented: $showingAlert) {
             Alert(
                 title: Text("Account Creation"),

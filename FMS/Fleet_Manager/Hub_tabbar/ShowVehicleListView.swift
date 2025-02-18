@@ -133,26 +133,58 @@ struct ShowVehicleListView: View {
                     .padding(.horizontal)
                 
                 // Display the list of vehicles once data is fetched
-                List(filteredVehicles) { vehicle in
+                List(filteredVehicles, id: \.id) { vehicle in
                     NavigationLink(destination: VehicleDetailsView(vehicle: vehicle)) {
-                        VStack(alignment: .leading) {
-                            Text(vehicle.model)
-                                .foregroundColor(.black)
-                                .font(.headline)
-                            Text("Type: \(vehicle.type.rawValue)")
-                                .font(.subheadline)
-                            Text("Mileage: \(vehicle.mileage) km")
-                                .font(.subheadline)
+                        HStack {
+                            // Truck Icon - Ensures Proper Display
+                            Image(systemName: "truck.box.fill")
+                                .resizable() // Allows resizing
+                                .scaledToFit() // Ensures it maintains aspect ratio
+                                .frame(width: 20, height: 20) // Sets fixed size
+//                                .foregroundColor(.gray)
+                                .padding(.leading, 8)
+
+                            // Vehicle Details
+                            VStack(alignment: .leading) {
+                                Text(vehicle.model)
+                                    .foregroundColor(.black)
+                                    .font(.headline)
+                                Text(vehicle.type.rawValue)
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                            }
+                            .padding(.vertical, 5)
+
+                            Spacer()
+//                            Text(vehicle.status)
+                            HStack{
+                                
+                                Circle()
+                                    .fill(vehicle.status ? Color.green : Color.red)
+                                    .frame(width: 8, height: 8)
+                                if vehicle.status {
+                                    Text("Active")
+                                        .foregroundColor(Color.green)
+                                } else {
+                                    Text("Inactive")
+                                        .foregroundColor(Color.green)
+                                }
+                            }
+
+                         
                         }
-                        .padding(.vertical, 5)
+                        .padding()
+                        .background(Color.white)
                         .cornerRadius(10)
-                        .shadow(radius: 5)
+
                     }
                 }
+                .listStyle(PlainListStyle()) // Removes default List styling
+
             }
         }
         .onAppear {
-            fetchVehicles()  // Fetch the vehicles when the view appears
+            fetchVehicles()
         }
         .navigationTitle("Vehicle List")
     }

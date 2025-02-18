@@ -15,6 +15,8 @@ struct VehicleDetailsView: View {
     @State private var fuelType: FuelType
     @State private var mileage: String
     
+    @State private var isModified = false
+    
     let db = Firestore.firestore()
     
     init(vehicle: Vehicle) {
@@ -123,20 +125,28 @@ struct VehicleDetailsView: View {
                     .scaledToFit()
                     .frame(height: 220)
                     .cornerRadius(15)
-                    .shadow(radius: 10)
+//                    .shadow(radius: 10)
                     .padding(.horizontal)
                 
                 // Vehicle Details Section
                 Group {
                     DetailField(title: "Vehicle Type", value: vehicleType.rawValue, isEditable: isEditing, onChange: { newValue in
-                        vehicleType = VehicleType(rawValue: newValue) ?? vehicleType
-                    })
-                    DetailField(title: "Model", value: model, isEditable: isEditing, onChange: { model = $0 })
-                    DetailField(title: "Registration Number", value: vehicle.registrationNumber, isEditable: false)
-                    DetailField(title: "Fuel Type", value: fuelType.rawValue, isEditable: isEditing, onChange: { newValue in
-                        fuelType = FuelType(rawValue: newValue) ?? fuelType
-                    })
-                    DetailField(title: "Mileage", value: mileage, isEditable: isEditing, onChange: { mileage = $0 })
+                                vehicleType = VehicleType(rawValue: newValue) ?? vehicleType
+                                isModified = true
+                            })
+                            DetailField(title: "Model", value: model, isEditable: isEditing, onChange: { newValue in
+                                model = newValue
+                                isModified = true
+                            })
+                            DetailField(title: "Registration Number", value: vehicle.registrationNumber, isEditable: false)
+                            DetailField(title: "Fuel Type", value: fuelType.rawValue, isEditable: isEditing, onChange: { newValue in
+                                fuelType = FuelType(rawValue: newValue) ?? fuelType
+                                isModified = true
+                            })
+                            DetailField(title: "Mileage", value: mileage, isEditable: isEditing, onChange: { newValue in
+                                mileage = newValue
+                                isModified = true
+                            })
                 }
                 .padding(.horizontal)
                 
@@ -154,7 +164,8 @@ struct VehicleDetailsView: View {
                                 .background(Color.blue)
                                 .cornerRadius(10)
                                 .shadow(radius: 5)
-                        }
+                        } .disabled(!isModified)
+                            .opacity((isModified) ? 1 : 0.5)
                         .padding(.horizontal)
                     } else {
                         Button(action: {
@@ -198,7 +209,7 @@ struct VehicleDetailsView: View {
                 dismiss()
             }
         } message: {
-            Text(isEditing ? "Vehicle updated successfully" : "Vehicle deleted successfully")
+            Text(isEditing ? "Vehicle updated successfully" : "Vehicle updated successfully")
         }
         .confirmationDialog(
             "Delete Vehicle",
@@ -243,7 +254,7 @@ struct DetailField: View {
                     .padding(10)
                     .background(Color.white)
                     .cornerRadius(10)
-                    .shadow(radius: 5)
+//                    .shadow(radius: 5)
                     .onChange(of: localText) { newValue in
                         onChange?(newValue)
                     }
@@ -255,7 +266,7 @@ struct DetailField: View {
                     .padding(10)
                     .background(Color.white)
                     .cornerRadius(10)
-                    .shadow(radius: 5)
+//                    .shadow(radius: 5)
             }
         }
     }
