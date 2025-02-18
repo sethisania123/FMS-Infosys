@@ -167,8 +167,9 @@ class Trip: Codable {
     var estimatedTime: Float
     var assignedDriver: Driver?
     var TripStatus: TripStatus
+    var assignedVehicle: Vehicle?
     
-    init(tripDate: Date, startLocation: String, endLocation: String, distance: Float, estimatedTime: Float, assignedDriver: Driver?, TripStatus: TripStatus) {
+    init(tripDate: Date, startLocation: String, endLocation: String, distance: Float, estimatedTime: Float, assignedDriver: Driver?, TripStatus: TripStatus, assignedVehicle: Vehicle?) {
         self.tripDate = tripDate
         self.startLocation = startLocation
         self.endLocation = endLocation
@@ -176,6 +177,7 @@ class Trip: Codable {
         self.estimatedTime = estimatedTime
         self.assignedDriver = assignedDriver
         self.TripStatus = TripStatus
+        self.assignedVehicle = assignedVehicle
     }
 }
 
