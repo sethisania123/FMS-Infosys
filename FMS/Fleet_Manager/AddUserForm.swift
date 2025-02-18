@@ -138,7 +138,11 @@ struct AddUserView: View {
             .cornerRadius(8)
         }
     }
-    
+    private var isButtonDisabled: Bool {
+        return isLoading || name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+               email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+               contactNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
     
     
     var body: some View {
@@ -159,31 +163,33 @@ struct AddUserView: View {
                     if selectedRole == "Fleet Manager" {
                         
                         Section(header: Text("Name").font(.headline)
-                            .padding(.leading, -22)) {
-                                TextField("Enter your name", text: $name)
-                                    .onChange(of: name) { newValue in
-                                        if !newValue.isEmpty && !isValidName(newValue) {
-                                            nameError = "Name should only contain letters"
-                                        } else {
-                                            nameError = nil
+                                            .padding(.leading, -22)) {
+                                    TextField("Enter your name", text: $name)
+                                        .onChange(of: name) { newValue in
+                                            name = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+                                            
+                                            if !name.isEmpty && !isValidName(name) {
+                                                nameError = "Name should only contain letters"
+                                            } else {
+                                                nameError = nil
+                                            }
                                         }
+                                        .padding(5)
+                                        .background(Color.clear)
+                                        .frame(height: 47)
+                                        .listRowBackground(Color.clear)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .stroke(Color.gray, lineWidth: 1)
+                                        )
+                                        .frame(width: 361)
+                                    
+                                    if let error = nameError {
+                                        Text(error)
+                                            .foregroundColor(.red)
+                                            .font(.caption)
                                     }
-                                    .padding(5)
-                                    .background(Color.clear)
-                                    .frame(height: 47)
-                                    .listRowBackground(Color.clear)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .stroke(Color.gray, lineWidth: 1)
-                                    )
-                                    .frame(width:361)
-                                if let error = nameError {
-                                    Text(error)
-                                        .foregroundColor(.red)
-                                        .font(.caption)
                                 }
-                            }
-                        
                         Section(header: Text("Email").font(.headline).padding(.leading, -22)) {
                             TextField("Enter your email", text: $email)
                                 .keyboardType(.emailAddress)
@@ -240,8 +246,8 @@ struct AddUserView: View {
                                     .cornerRadius(8)
                             }
                           
-                            .disabled(isLoading||email.isEmpty || email.isEmpty || contactNumber.isEmpty)
-                            .opacity((email.isEmpty || email.isEmpty || contactNumber.isEmpty) ? 0.5 : 1)
+                            .disabled(isButtonDisabled)
+                            .opacity((isButtonDisabled) ? 0.5 : 1)
 
                         }
                         .listRowBackground(Color.clear)

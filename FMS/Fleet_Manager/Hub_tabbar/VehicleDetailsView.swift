@@ -16,6 +16,7 @@ struct VehicleDetailsView: View {
     @State private var mileage: String
     
     @State private var isModified = false
+    @State private var isInvalidMileage: Bool = false
     
     let db = Firestore.firestore()
     
@@ -143,10 +144,21 @@ struct VehicleDetailsView: View {
                                 fuelType = FuelType(rawValue: newValue) ?? fuelType
                                 isModified = true
                             })
-                            DetailField(title: "Mileage", value: mileage, isEditable: isEditing, onChange: { newValue in
-                                mileage = newValue
-                                isModified = true
-                            })
+                    DetailField(title: "Mileage", value: mileage, isEditable: isEditing, onChange: { newValue in
+                        if newValue.allSatisfy({ $0.isNumber }) {
+                            mileage = newValue
+                            isInvalidMileage = false
+                            isModified = true
+                        } else {
+                            isInvalidMileage = true
+                        }
+                    })
+
+                    if isInvalidMileage {
+                        Text("Invalid Mileage. Only numbers allowed.")
+                            .foregroundColor(.red)
+                            .font(.caption)
+                    }
                 }
                 .padding(.horizontal)
                 
@@ -181,7 +193,7 @@ struct VehicleDetailsView: View {
                             .padding()
                             .background(Color.red.opacity(0.1))
                             .cornerRadius(10)
-                            .shadow(radius: 5)
+//                            .shadow(radius: 5)
                         }
                         .padding(.horizontal)
                     }
@@ -289,7 +301,7 @@ struct DocumentView: View {
                 .scaledToFit()
                 .frame(height: 180)
                 .cornerRadius(10)
-                .shadow(radius: 8)
+//                .shadow(radius: 8)
                 .padding(.horizontal)
         }
     }

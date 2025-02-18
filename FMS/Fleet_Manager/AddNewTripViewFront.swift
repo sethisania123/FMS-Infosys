@@ -228,21 +228,36 @@ struct AddNewTripView: View {
     @StateObject private var fromLocationVM = LocationSearchViewModel()
     @StateObject private var toLocationVM = LocationSearchViewModel()
     
+    var isSaveEnabled: Bool {
+           return !fromLocation.isEmpty &&
+                  !toLocation.isEmpty &&
+                  !selectedGeoArea.isEmpty &&
+                  deliveryDate > Date()
+    }
+    
     var body: some View {
         VStack {
             Form {
                 Section(header: Text("From")) {
-                    LocationInputField(text: $fromLocation, searchViewModel: fromLocationVM, placeholder: "Enter pickup location")
-                        .padding()
+                    LocationInputField(
+                        text: $fromLocation, searchViewModel: fromLocationVM, placeholder: "Enter pickup location"
+                    ) .font(.system(size: 12))
+                        .frame(height: 46)
+                        .padding(.vertical, -2)
+//                        .padding()
                         .background(RoundedRectangle(cornerRadius: 8).fill(Color.white))
-                        .overlay(HStack { Image(systemName: "mappin.and.ellipse").foregroundColor(.gray); Spacer() }.padding(.leading, 8))
+                        .overlay(HStack { Image(systemName: "mappin.and.ellipse").foregroundColor(.gray); Spacer() }
+                            .padding(.leading, -10))
                 }
                 
                 Section(header: Text("To")) {
                     LocationInputField(text: $toLocation, searchViewModel: toLocationVM, placeholder: "Enter destination")
-                        .padding()
+                        .font(.system(size: 12))
+                            .frame(height: 46)
+                            .padding(.vertical, -2)
+//                        .padding()
                         .background(RoundedRectangle(cornerRadius: 8).fill(Color.white))
-                        .overlay(HStack { Image(systemName: "mappin.and.ellipse").foregroundColor(.gray); Spacer() }.padding(.leading, 8))
+                        .overlay(HStack { Image(systemName: "mappin.and.ellipse").foregroundColor(.gray); Spacer() }.padding(.leading, -10))
                 }
                 
                 Section(header: Text("Terrain Type")) {
@@ -255,7 +270,7 @@ struct AddNewTripView: View {
                 }
                 
                 Section(header: Text("Delivery Date")) {
-                    DatePicker("Select Date", selection: $deliveryDate, displayedComponents: .date)
+                    DatePicker("Select Date", selection: $deliveryDate, in: Date()..., displayedComponents: .date)
                 }
                 
                 Section(header: Text("Distance & Time")) {
@@ -264,7 +279,8 @@ struct AddNewTripView: View {
                 }
             }
             
-            VStack {
+            VStack{
+                
                 if isLoading {
                     ProgressView()
                 } else {
@@ -277,6 +293,8 @@ struct AddNewTripView: View {
                             .cornerRadius(17)
                     }
                     .padding()
+                    .disabled(!isSaveEnabled)
+                    .opacity((!isSaveEnabled) ? 0.5 : 1)
                 }
             }
             Spacer()
@@ -358,35 +376,35 @@ struct AddNewTripView: View {
 }
 
 
-struct TripListView: View {
-    @State private var trips: [Trip] = []
-    private let db = Firestore.firestore()
-    
-    var body: some View {
-        List(trips, id: \.id) { trip in
-            VStack(alignment: .leading) {
-                Text("From: \(trip.startLocation) → To: \(trip.endLocation)")
-                    .font(.headline)
-                Text("Status: \(trip.TripStatus.rawValue)")
-                    .font(.subheadline)
-            }
-        }
-        .onAppear(perform: fetchTrips)
-        .navigationTitle("Trips")
-    }
-    
-    private func fetchTrips() {
-        db.collection("trips").getDocuments { snapshot, error in
-            guard let documents = snapshot?.documents, error == nil else {
-                print("Error fetching trips: \(error?.localizedDescription ?? "Unknown error")")
-                return
-            }
-            self.trips = documents.compactMap { doc in
-                try? doc.data(as: Trip.self)
-            }
-        }
-    }
-}
+//struct TripListView: View {
+//    @State private var trips: [Trip] = []
+//    private let db = Firestore.firestore()
+//    
+//    var body: some View {
+//        List(trips, id: \.id) { trip in
+//            VStack(alignment: .leading) {
+//                Text("From: \(trip.startLocation) → To: \(trip.endLocation)")
+//                    .font(.headline)
+//                Text("Status: \(trip.TripStatus.rawValue)")
+//                    .font(.subheadline)
+//            }
+//        }
+//        .onAppear(perform: fetchTrips)
+//        .navigationTitle("Trips")
+//    }
+//    
+//    private func fetchTrips() {
+//        db.collection("trips").getDocuments { snapshot, error in
+//            guard let documents = snapshot?.documents, error == nil else {
+//                print("Error fetching trips: \(error?.localizedDescription ?? "Unknown error")")
+//                return
+//            }
+//            self.trips = documents.compactMap { doc in
+//                try? doc.data(as: Trip.self)
+//            }
+//        }
+//    }
+//}
 
 struct TripListView_Previews: PreviewProvider {
     static var previews: some View {

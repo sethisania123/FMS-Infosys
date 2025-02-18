@@ -21,7 +21,7 @@ struct hubTabBar: View {
 
     
     var body: some View {
-        NavigationStack {
+        NavigationView {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     
@@ -274,9 +274,12 @@ struct DriverCard: View {
                 Circle()
 //                    .fill(user.statusColor)
                     .frame(width: 8, height: 8)
-                Text(user.name)
-                    .font(.caption)
-                    .foregroundColor(.gray)
+//                if user.status{
+//                    Text("Active")
+//                        .font(.caption)
+//                        .foregroundColor(.gray)
+//                }
+              
             }.padding(.top,20)
                 .padding(.leading,-30)
         }

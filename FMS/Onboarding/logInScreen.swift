@@ -48,7 +48,7 @@ struct LoginView: View {
                         // Show success message before redirecting
                         DispatchQueue.main.async {
                             alertMessage = "Logged In Successfully!"
-                            showAlert = true
+//                            showAlert = true
 
                             // Delay before navigation
                             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {

@@ -41,7 +41,7 @@ struct FleetControlDashboard: View {
                     Label("Hub", systemImage: "square.stack.3d.up")
                 }
             
-            TripListView()
+            TripdashBoard()
                 .tabItem {
                     Label("Trips", systemImage: "map.fill")
                 }
@@ -58,7 +58,7 @@ struct DashboardView: View {
     var trips = generateExampleTrips()
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     
@@ -89,9 +89,9 @@ struct DashboardView: View {
     
                    
 //                    HStack {
-//                        Text("Recent Activities")
-//                            .font(.headline)
-//                            .padding(.horizontal)
+                        Text("Recent Activities")
+                            .font(.headline)
+                            .padding(.horizontal)
 ////                        Spacer()
 //                        Text("See all")
 //                            .padding(.leading,150)
@@ -113,6 +113,7 @@ struct DashboardView: View {
                 UINavigationBar.appearance().isTranslucent = false
             }
         }
+        
     }
 }
 
