@@ -14,9 +14,9 @@ struct DriverListView: View {
     @State private var showAlert = false
     @State private var showDeleteSuccessAlert = false
     @State private var userToDelete: User?
-
+    
     let db = Firestore.firestore()
-
+    
     var filteredUsers: [User] {
         if searchText.isEmpty {
             return users
@@ -24,7 +24,7 @@ struct DriverListView: View {
             return users.filter { $0.name.lowercased().contains(searchText.lowercased()) }
         }
     }
-
+    
     var body: some View {
         NavigationView {
             VStack {
@@ -34,7 +34,7 @@ struct DriverListView: View {
                     .cornerRadius(10)
                     .padding(.horizontal)
                     .padding(.top, 20)
-
+                
                 List {
                     ForEach(filteredUsers, id: \.id) { user in
                         NavigationLink(destination: DriverDetails(user: user)) {
@@ -70,7 +70,7 @@ struct DriverListView: View {
             .navigationBarTitleDisplayMode(.inline)
         }
     }
-
+    
     func fetchUsersDriver() {
         db.collection("users").whereField("role", isEqualTo: "Driver").getDocuments { snapshot, error in
             guard let documents = snapshot?.documents, error == nil else {
@@ -83,7 +83,7 @@ struct DriverListView: View {
             }
         }
     }
-
+    
     func confirmDelete(at offsets: IndexSet) {
         if let index = offsets.first {
             let user = users[index]
@@ -95,8 +95,8 @@ struct DriverListView: View {
             }
         }
     }
-
-
+    
+    
     func deleteUser(_ user: User) {
         db.collection("users").document(user.id ?? "").delete { error in
             if let error = error {
@@ -110,7 +110,6 @@ struct DriverListView: View {
         }
     }
 }
-
 struct DriverRow: View {
     let user: User
 
