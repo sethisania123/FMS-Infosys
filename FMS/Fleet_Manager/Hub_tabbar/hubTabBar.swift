@@ -13,7 +13,12 @@ import FirebaseFirestore
 
 struct hubTabBar: View {
     @State var users: [User] = []
+    @State  var vehicles: [Vehicle] = []
+
     let db = Firestore.firestore()
+    @State private var errorMessage: String?
+    @State private var isLoading = true
+
     
     var body: some View {
         NavigationStack {
@@ -22,7 +27,7 @@ struct hubTabBar: View {
                     
                     // Vehicles Section
                     SectionHeader(title: "Vehicle", destination: ShowVehicleListView())
-                    VehicleList()
+                    VehicleList(filteredVehicles: vehicles)
                     
                     // Drivers Section
                     SectionHeader(title: "Drivers", destination: DriverListView()
@@ -45,6 +50,7 @@ struct hubTabBar: View {
                 UINavigationBar.appearance().shadowImage = UIImage()
                 UINavigationBar.appearance().isTranslucent = false
                 fetchUsersDriver()
+                fetchVehicles()
             }
         }
     }
@@ -61,6 +67,47 @@ struct hubTabBar: View {
             }
         }
     }
+    
+    func fetchVehicles() {
+        let db = Firestore.firestore()
+        db.collection("vehicles").getDocuments { snapshot, error in
+            if let error = error {
+                // Handle error by updating errorMessage state
+                DispatchQueue.main.async {
+                    self.errorMessage = "Error fetching vehicles: \(error.localizedDescription)"
+                    self.isLoading = false
+                }
+                print("Error fetching vehicles: \(error)")
+                return
+            }
+            
+            guard let snapshot = snapshot else {
+                // Handle case where snapshot is nil
+                DispatchQueue.main.async {
+                    self.errorMessage = "No vehicles found."
+                    self.isLoading = false
+                }
+                return
+            }
+            
+            let vehicles = snapshot.documents.compactMap { document -> Vehicle? in
+                do {
+                    let vehicleData = try document.data(as: Vehicle.self)
+                    return vehicleData
+                } catch {
+                    print("Error decoding vehicle: \(error)")
+                    return nil
+                }
+            }
+            
+            // Update state with the fetched vehicles
+            DispatchQueue.main.async {
+                self.vehicles = vehicles
+                self.isLoading = false
+            }
+        }
+    }
+
 }
 
 
@@ -87,34 +134,37 @@ struct SectionHeader<Destination: View>: View {
 
 
 struct VehicleList: View {
-    let vehicles = [
-        Vehicle(
-            type: .car,
-            model: "Tesla Model 3",
-            registrationNumber: "ABC1234",
-            fuelType: .electric,
-            mileage: 12000,
-            rc: "RC123456789",
-            vehicleImage: "Freightliner_M2_106_6x4_2014_(14240376744)",
-            insurance: "Insured until 2026",
-            pollution: "Euro 6",
-            status: true),
-        Vehicle(
-            type: .car,
-            model: "Tesla Model 3",
-            registrationNumber: "ABC1234",
-            fuelType: .electric,
-            mileage: 12000,
-            rc: "RC123456789",
-            vehicleImage: "Freightliner_M2_106_6x4_2014_(14240376744)",
-            insurance: "Insured until 2026",
-            pollution: "Euro 6",
-            status: true)
-    ]
+//    let vehicles = [
+//        Vehicle(
+//            type: .car,
+//            model: "Tesla Model 3",
+//            registrationNumber: "ABC1234",
+//            fuelType: .electric,
+//            mileage: 12000,
+//            rc: "RC123456789",
+//            vehicleImage: "Freightliner_M2_106_6x4_2014_(14240376744)",
+//            insurance: "Insured until 2026",
+//            pollution: "Euro 6",
+//            status: true),
+//        Vehicle(
+//            type: .car,
+//            model: "Tesla Model 3",
+//            registrationNumber: "ABC1234",
+//            fuelType: .electric,
+//            mileage: 12000,
+//            rc: "RC123456789",
+//            vehicleImage: "Freightliner_M2_106_6x4_2014_(14240376744)",
+//            insurance: "Insured until 2026",
+//            pollution: "Euro 6",
+//            status: true)
+//    ]
+    
+    var filteredVehicles: [Vehicle]
+
     
     var body: some View {
         VStack {
-            ForEach(vehicles) { vehicle in
+            ForEach(filteredVehicles.prefix(2)) { vehicle in
                 VehicleCard(vehicle: vehicle)
             }
         }
@@ -127,18 +177,26 @@ struct VehicleCard: View {
     
     var body: some View {
         HStack(spacing: 12) {
+            
+            Image("Freightliner_M2_106_6x4_2014_(14240376744)")
+                .resizable()
+                .scaledToFit()
+                .frame( height: 80)
+                .cornerRadius(15)
+//                .shadow(radius: 5)
+//                .padding()
             // Display vehicle image from URL
-            AsyncImage(url: URL(string: vehicle.vehicleImage)) { image in
-                image
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 100, height: 100)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-            } placeholder: {
-                Color.gray
-                    .frame(width: 100, height: 100)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-            }
+//            AsyncImage(url: URL(string: vehicle.model)) { image in
+//                image
+//                    .resizable()
+//                    .scaledToFit()
+//                    .frame(width: 100, height: 100)
+//                    .clipShape(RoundedRectangle(cornerRadius: 8))
+//            } placeholder: {
+//                Color.gray
+//                    .frame(width: 100, height: 100)
+//                    .clipShape(RoundedRectangle(cornerRadius: 8))
+//            }
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(vehicle.model)
@@ -148,7 +206,6 @@ struct VehicleCard: View {
                     .foregroundColor(.gray)
                 
                 HStack {
-                    // Display status as a circle with color
                     Circle()
                         .fill(vehicle.status ? Color.green : Color.red)
                         .frame(width: 8, height: 8)
@@ -161,7 +218,9 @@ struct VehicleCard: View {
             
             Spacer()
         }
-        .padding()  // Add padding to make the card look nicer
+        
+        .padding()
+        .padding(.leading,-7)// Add padding to make the card look nicer
         .background(Color(.systemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .shadow(color: Color.black.opacity(0.1), radius: 3)

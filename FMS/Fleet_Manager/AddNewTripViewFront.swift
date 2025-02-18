@@ -234,7 +234,7 @@ struct AddNewTripView: View {
     let firestoreService = FirestoreService()
     
     var body: some View {
-        NavigationView {
+//        NavigationView {
             VStack {
                 Form {
                     Section(header: Text("From")) {
@@ -316,7 +316,7 @@ struct AddNewTripView: View {
             .navigationBarTitle("Add New Trip", displayMode: .inline)
 //            .navigationBarItems(leading: Button("Back"){})
             
-        }
+//        }
 
     }
     
