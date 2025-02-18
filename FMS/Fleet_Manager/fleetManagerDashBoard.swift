@@ -5,8 +5,9 @@
 //  Created by Ankush Sharma on 11/02/25.
 //
 import SwiftUI
+import FirebaseFirestore
 
-
+// MARK: - Example Data
 func generateExampleTrips() -> [Trip] {
     let driver1 = Driver(name: "John Doe", email: "john@example.com", phone: "123-456-7890", experience: .moreThanFive, license: "D12345", geoPreference: .plain, vehiclePreference: .truck, status: true)
 
@@ -40,12 +41,10 @@ struct FleetControlDashboard: View {
                 .tabItem {
                     Label("Hub", systemImage: "square.stack.3d.up")
                 }
-            
             TripdashBoard()
                 .tabItem {
                     Label("Trips", systemImage: "map.fill")
                 }
-            
             FleetProfileView()
                 .tabItem {
                     Label("Profile", systemImage: "person.fill")
@@ -56,17 +55,27 @@ struct FleetControlDashboard: View {
 
 struct DashboardView: View {
     var trips = generateExampleTrips()
-
+    
+    // Counts fetched from Firestore
+    @State var driverCount: Int = 0
+    @State var vehicleCount: Int = 0
+    @State var maintenanceCount: Int = 0
+    @State var activeTripsCount: Int = 0
+    @State private var errorMessage: String?
+    
+    let db = Firestore.firestore()
+    
     var body: some View {
         NavigationView {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     
+                    // MARK: - Info Cards Grid
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
-                        InfoCard(icon: "truck.box.fill", value: "48", title: "Total Vehicles", color: .blue)
-                        InfoCard(icon: "map.fill", value: "23", title: "Active Trips", color: .green)
-                        MainteneceInfoCard(icon: "person.3.fill", value: "32", title: "Maintenance Personnel", color: .purple)
-                        InfoCard(icon: "person.crop.circle.fill", value: "45", title: "Total Drivers", color: .orange)
+                        InfoCard(icon: "truck.box.fill", value: "\(vehicleCount)", title: "Total Vehicles", color: .blue)
+                        InfoCard(icon: "map.fill", value: "\(activeTripsCount)", title: "Active Trips", color: .green)
+                        MainteneceInfoCard(icon: "person.3.fill", value: "\(maintenanceCount)", title: "Maintenance Personnel", color: .purple)
+                        InfoCard(icon: "person.crop.circle.fill", value: "\(driverCount)", title: "Total Drivers", color: .orange)
                     }
                     .padding(.horizontal)
                     
@@ -86,19 +95,11 @@ struct DashboardView: View {
                         }
                     }
                     .padding(.horizontal)
-    
-                   
-//                    HStack {
-                        Text("Recent Activities")
-                            .font(.headline)
-                            .padding(.horizontal)
-////                        Spacer()
-//                        Text("See all")
-//                            .padding(.leading,150)
-//                            .font(.system(size: 15))
-//                            .foregroundColor(.blue)
-//                    }
-       
+                    
+                    Text("Recent Activities")
+                        .font(.headline)
+                        .padding(.horizontal)
+                    
                     ForEach(trips, id: \.id) { trip in
                         TripCardView(trip: trip)
                             .padding(.bottom)
@@ -111,9 +112,70 @@ struct DashboardView: View {
             .onAppear {
                 UINavigationBar.appearance().backgroundColor = .white
                 UINavigationBar.appearance().isTranslucent = false
+                fetchDriversCount()
+                fetchVehicleCount()
+                fetchMaintenanceCount()
+                fetchActiveTripsCount()
             }
         }
-        
+    }
+    
+    // MARK: - Firestore Fetch Functions
+    
+    func fetchDriversCount() {
+        db.collection("users").whereField("role", isEqualTo: "Driver").getDocuments { snapshot, error in
+            guard let documents = snapshot?.documents, error == nil else {
+                print("Error fetching drivers: \(error?.localizedDescription ?? "Unknown error")")
+                return
+            }
+            DispatchQueue.main.async {
+                self.driverCount = documents.count
+            }
+            print("Total number of drivers: \(driverCount)")
+        }
+    }
+    
+    func fetchVehicleCount() {
+        db.collection("vehicles").getDocuments { snapshot, error in
+            if let error = error {
+                DispatchQueue.main.async {
+                    self.errorMessage = "Error fetching vehicle count: \(error.localizedDescription)"
+                }
+                print("Error fetching vehicle count: \(error)")
+                return
+            }
+            DispatchQueue.main.async {
+                self.vehicleCount = snapshot?.documents.count ?? 0
+            }
+            print("Total number of vehicles: \(self.vehicleCount)")
+        }
+    }
+    
+    func fetchMaintenanceCount() {
+        db.collection("users").whereField("role", isEqualTo: "Maintenance Personnel").getDocuments { snapshot, error in
+            if let error = error {
+                print("Error fetching maintenance personnel count: \(error.localizedDescription)")
+                return
+            }
+            DispatchQueue.main.async {
+                self.maintenanceCount = snapshot?.documents.count ?? 0
+            }
+            print("Total number of maintenance personnel: \(self.maintenanceCount)")
+        }
+    }
+    
+    func fetchActiveTripsCount() {
+        // Assuming "active trips" are those with status "Scheduled" or "In Progress"
+        db.collection("trips").whereField("TripStatus", in: ["Scheduled", "In Progress"]).getDocuments { snapshot, error in
+            if let error = error {
+                print("Error fetching active trips count: \(error.localizedDescription)")
+                return
+            }
+            DispatchQueue.main.async {
+                self.activeTripsCount = snapshot?.documents.count ?? 0
+            }
+            print("Total number of active trips: \(self.activeTripsCount)")
+        }
     }
 }
 
@@ -173,7 +235,7 @@ struct TripCardView: View {
             }
 
             Rectangle()
-                .frame(maxWidth: .infinity,maxHeight: 1)
+                .frame(maxWidth: .infinity, maxHeight: 1)
                 .foregroundColor(.gray)
                 .opacity(0.5)
 
@@ -187,7 +249,7 @@ struct TripCardView: View {
                 Spacer()
 
                 // Calculating ETA based on trip's estimated time
-                let etaDate = trip.tripDate.addingTimeInterval(TimeInterval(trip.estimatedTime * 3600)) // ETA in hours
+                let etaDate = trip.tripDate.addingTimeInterval(TimeInterval(trip.estimatedTime * 3600))
                 Label {
                     Text("ETA: \(formatDate(etaDate))")
                 } icon: {
@@ -202,6 +264,7 @@ struct TripCardView: View {
         .padding(.horizontal)
     }
 }
+
 struct ActionButton: View {
     var icon: String
     var title: String
@@ -221,6 +284,7 @@ struct ActionButton: View {
         .cornerRadius(12)
     }
 }
+
 struct InfoCard: View {
     let icon: String
     let value: String
@@ -231,32 +295,26 @@ struct InfoCard: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .top, spacing: 12) {
                 // Circle behind the image
-                VStack{
-                    ZStack {
-                        Circle()
-                            .fill(color)
-                            .frame(width: 40, height: 40) // Adjust size of the circle
-                        Image(systemName: icon)
-                            .font(.title2)
-                            .foregroundColor(.white) // Icon color inside the circle
-                    }.padding(.leading,-80)
-                    
-                    // Title and value aligned to the left
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(value)
-                            .font(.title)
-                            .bold()
-                        
-                        Text(title)
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
-                    }.padding(.leading,-80)
-                    
-                    Spacer() // Keeps the content to the left
+                ZStack {
+                    Circle()
+                        .fill(color)
+                        .frame(width: 40, height: 40)
+                    Image(systemName: icon)
+                        .font(.title2)
+                        .foregroundColor(.white)
                 }
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(value)
+                        .font(.title)
+                        .bold()
+                    Text(title)
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                }
+                Spacer()
             }
             .padding(.top, 16)
-            .padding(.leading, 14) // This ensures the left padding for all the content
+            .padding(.leading, 14)
         }
         .frame(maxWidth: .infinity, minHeight: 100)
         .background(Color.white)
@@ -275,32 +333,26 @@ struct MainteneceInfoCard: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .top, spacing: 12) {
                 // Circle behind the image
-                VStack{
-                    ZStack {
-                        Circle()
-                            .fill(color)
-                            .frame(width: 40, height: 40) // Adjust size of the circle
-                        Image(systemName: icon)
-                            .font(.title2)
-                            .foregroundColor(.white) // Icon color inside the circle
-                    }.padding(.leading,-80)
-                    
-                    // Title and value aligned to the left
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(value)
-                            .font(.title)
-                            .bold()
-                        
-                        Text(title)
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
-                    }
-                    
-                    Spacer() // Keeps the content to the left
+                ZStack {
+                    Circle()
+                        .fill(color)
+                        .frame(width: 40, height: 40)
+                    Image(systemName: icon)
+                        .font(.title2)
+                        .foregroundColor(.white)
                 }
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(value)
+                        .font(.title)
+                        .bold()
+                    Text(title)
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                }
+                Spacer()
             }
             .padding(.top, 16)
-            .padding(.leading, 14) // This ensures the left padding for all the content
+            .padding(.leading, 14)
         }
         .frame(maxWidth: .infinity, minHeight: 100)
         .background(Color.white)

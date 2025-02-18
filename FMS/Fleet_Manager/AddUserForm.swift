@@ -356,7 +356,7 @@ struct AddUserView: View {
                         }
                         Section {
                             Button(action: {
-//                                validateForm()
+                                validateForm()
                             }) {
                                 Text("Create Account")
                                     .frame(maxWidth: .infinity)
@@ -365,8 +365,8 @@ struct AddUserView: View {
                                     .foregroundColor(.white)
                                     .cornerRadius(8)
                             }
-                            .disabled(isLoading||email.isEmpty || email.isEmpty || contactNumber.isEmpty)
-                            .opacity((email.isEmpty || email.isEmpty || contactNumber.isEmpty) ? 0.5 : 1)
+                            .disabled(isLoading || name.isEmpty || email.isEmpty || contactNumber.isEmpty)
+                            .opacity((email.isEmpty || name.isEmpty || contactNumber.isEmpty) ? 0.5 : 1)
                         }
                         .listRowBackground(Color.clear)
                     }
@@ -446,7 +446,7 @@ struct AddUserView: View {
                         
                         Section {
                             Button(action: {
-//                                validateForm()
+                               validateForm()
                             }) {
                                 Text("Create Account")
                                     .frame(maxWidth: .infinity)
@@ -455,8 +455,8 @@ struct AddUserView: View {
                                     .foregroundColor(.white)
                                     .cornerRadius(8)
                             }
-                            .disabled(isLoading||email.isEmpty || email.isEmpty || contactNumber.isEmpty)
-                            .opacity((email.isEmpty || email.isEmpty || contactNumber.isEmpty) ? 0.5 : 1)
+                            .disabled(isLoading||name.isEmpty || email.isEmpty || contactNumber.isEmpty)
+                            .opacity((name.isEmpty || email.isEmpty || contactNumber.isEmpty) ? 0.5 : 1)
                         }
                         .listRowBackground(Color.clear)
                         
@@ -552,6 +552,14 @@ struct AddUserView: View {
                 name: self.name,
                 phone: contactNumber
             )
+        } else if selectedRole == "Maintenance" {
+            let loginModel_t = LoginViewModel()
+            loginModel_t.createMaintenanceAccount(
+                email: self.email,
+                password: generatedPassword,
+                name: self.name,
+                phone: contactNumber
+            )
         }
         
         // Send email with credentials
@@ -572,7 +580,7 @@ struct AddUserView: View {
         
         let uploadParams = CLDUploadRequestParams()
             .setPublicId("license_photo_\(UUID().uuidString)")
-            .setFolder("fms/") // You can change the folder name
+            .setFolder("fms/")
             .setResourceType(.image)
         
         cloudinary.createUploader().upload(data: image.jpegData(compressionQuality: 0.8)!, uploadPreset: "FMS-iNFOSYS", params: uploadParams, completionHandler:  { (result, error) in
