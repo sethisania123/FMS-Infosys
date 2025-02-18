@@ -230,6 +230,13 @@ struct AddNewTripView: View {
     
     @State private var isLoading = false
     
+    var isSaveEnabled: Bool {
+           return !fromLocation.isEmpty &&
+                  !toLocation.isEmpty &&
+                  !selectedGeoArea.isEmpty &&
+                  deliveryDate > Date() // Ensure the date is valid (future date)
+       }
+    
     
     let firestoreService = FirestoreService()
     
@@ -283,8 +290,8 @@ struct AddNewTripView: View {
                         .pickerStyle(MenuPickerStyle())
                     }
                     
-                    Section(header : Text("Delievery Date")) {
-                        DatePicker("Select Date", selection: $deliveryDate, displayedComponents: .date)
+                    Section(header: Text("Delivery Date")) {
+                        DatePicker("Select Date", selection: $deliveryDate, in: Date()..., displayedComponents: .date)
                     }
                 }
                 VStack{
@@ -301,6 +308,8 @@ struct AddNewTripView: View {
                                 .cornerRadius(17)
                         }
                         .padding()
+                        .disabled(!isSaveEnabled)
+                        .opacity((!isSaveEnabled) ? 0.5 : 1)
                     }
                 }
                 Spacer()
@@ -358,35 +367,35 @@ struct AddNewTripView: View {
 
 
 
-struct TripListView: View {
-    @State private var trips: [Trip] = []
-    private let db = Firestore.firestore()
-    
-    var body: some View {
-        List(trips, id: \.id) { trip in
-            VStack(alignment: .leading) {
-                Text("From: \(trip.startLocation) → To: \(trip.endLocation)")
-                    .font(.headline)
-                Text("Status: \(trip.TripStatus.rawValue)")
-                    .font(.subheadline)
-            }
-        }
-        .onAppear(perform: fetchTrips)
-        .navigationTitle("Trips")
-    }
-    
-    private func fetchTrips() {
-        db.collection("trips").getDocuments { snapshot, error in
-            guard let documents = snapshot?.documents, error == nil else {
-                print("Error fetching trips: \(error?.localizedDescription ?? "Unknown error")")
-                return
-            }
-            self.trips = documents.compactMap { doc in
-                try? doc.data(as: Trip.self)
-            }
-        }
-    }
-}
+//struct TripListView: View {
+//    @State private var trips: [Trip] = []
+//    private let db = Firestore.firestore()
+//    
+//    var body: some View {
+//        List(trips, id: \.id) { trip in
+//            VStack(alignment: .leading) {
+//                Text("From: \(trip.startLocation) → To: \(trip.endLocation)")
+//                    .font(.headline)
+//                Text("Status: \(trip.TripStatus.rawValue)")
+//                    .font(.subheadline)
+//            }
+//        }
+//        .onAppear(perform: fetchTrips)
+//        .navigationTitle("Trips")
+//    }
+//    
+//    private func fetchTrips() {
+//        db.collection("trips").getDocuments { snapshot, error in
+//            guard let documents = snapshot?.documents, error == nil else {
+//                print("Error fetching trips: \(error?.localizedDescription ?? "Unknown error")")
+//                return
+//            }
+//            self.trips = documents.compactMap { doc in
+//                try? doc.data(as: Trip.self)
+//            }
+//        }
+//    }
+//}
 
 struct TripListView_Previews: PreviewProvider {
     static var previews: some View {

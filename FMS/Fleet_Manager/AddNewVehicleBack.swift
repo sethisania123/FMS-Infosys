@@ -136,15 +136,67 @@ struct AddNewVehicle: View {
     @State private var showAlert = false
     @State private var alertMessage = ""
     @State private var successAlert = false
+    
+    @State private var isInvalidRegistration: Bool = false
+    @State private var isInvalidMileage: Bool = false
+    
+    var isSaveEnabled: Bool {
+        return !model.isEmpty &&
+        !registrationNumber.isEmpty &&
+        !vehicleType.isEmpty &&
+        !fuelType.isEmpty &&
+        !mileage.isEmpty &&
+        rcDocument != nil &&
+        insurance != nil &&
+        pollutionCertificate != nil &&
+        vehiclePhoto != nil
+    }
+    
+    func validateRegistrationNumber(_ input: String) {
+           let numberCharacterSet = CharacterSet.decimalDigits
+           if input.rangeOfCharacter(from: numberCharacterSet.inverted) != nil {
+               isInvalidRegistration = true
+           } else {
+               isInvalidRegistration = false
+           }
+       }
+
+       func validateMileage(_ input: String) {
+           let numberCharacterSet = CharacterSet.decimalDigits
+           if input.rangeOfCharacter(from: numberCharacterSet.inverted) != nil {
+               isInvalidMileage = true
+           } else {
+               isInvalidMileage = false
+           }
+       }
+
+        
+        
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 15) {
                 VehicleFormField(title: "Model", placeholder: "Enter vehicle model", text: $model)
-                VehicleFormField(title: "Registration Number", placeholder: "Enter registration number", text: $registrationNumber)
+                VehicleFormField(title: "Registration Number", placeholder: "Enter registration number", text: $registrationNumber, keyboardType: .numberPad)
+                               .onChange(of: registrationNumber) { newValue in
+                                   validateRegistrationNumber(newValue)
+                               }
+                           if isInvalidRegistration {
+                               Text("Invalid Registration Number")
+                                   .foregroundColor(.red)
+                                   .font(.caption)
+                           }
                 VehicleTypeSelector(vehicleType: $vehicleType)
                 FuelTypeSelector(fuelType: $fuelType)
                 VehicleFormField(title: "Mileage", placeholder: "Enter current mileage", text: $mileage, keyboardType: .numberPad)
+                                .onChange(of: mileage) { newValue in
+                                    validateMileage(newValue)
+                                }
+                            if isInvalidMileage {
+                                Text("Invalid Mileage")
+                                    .foregroundColor(.red)
+                                    .font(.caption)
+                            }
                 
                 Section {
                     DocumentUploadButton(title: "RC Document", selectedImage: $rcDocument)
@@ -160,7 +212,8 @@ struct AddNewVehicle: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button("Save") { saveVehicle() }.foregroundColor(.blue)
+                Button("Save") { saveVehicle() }.foregroundColor(.blue).disabled(!isSaveEnabled)
+                    .opacity((!isSaveEnabled) ? 0.5 : 1)
             }
         }
         .alert(isPresented: $showAlert) {

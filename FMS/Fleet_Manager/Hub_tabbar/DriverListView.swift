@@ -26,7 +26,7 @@ struct DriverListView: View {
     }
 
     var body: some View {
-        NavigationView {
+//        NavigationView {
             VStack {
                 TextField("Search", text: $searchText)
                     .padding(10)
@@ -68,7 +68,7 @@ struct DriverListView: View {
             }
             .navigationTitle("Drivers")
             .navigationBarTitleDisplayMode(.inline)
-        }
+//        }
     }
 
     func fetchUsersDriver() {

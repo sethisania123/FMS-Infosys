@@ -26,6 +26,30 @@ struct AddDriverView: View {
     @State private var showImagePicker: Bool = false
     @State private var selectedImageItem: PhotosPickerItem? = nil
     @State private var licenseImage: UIImage? = nil
+    
+    @State private var isInvalidContactNumber: Bool = false
+    
+    @State private var isInvalidName: Bool = false
+    @State private var isInvalidEmail: Bool = false
+    
+    @State private var initialName: String = ""
+        @State private var initialEmail: String = ""
+        @State private var initialContactNumber: String = ""
+        @State private var initialLicenseNumber: String = ""
+        @State private var initialVehicle: String = ""
+        @State private var initialTerrain: String = ""
+        @State private var initialLicenseImage: UIImage?
+
+        var hasChanges: Bool {
+            return name != initialName ||
+                   email != initialEmail ||
+                   contactNumber != initialContactNumber ||
+                   licenseNumber != initialLicenseNumber ||
+                   selectedVehicle != initialVehicle ||
+                   selectedTerrain != initialTerrain ||
+                   licenseImage !== initialLicenseImage
+        }
+    
 
     private let db = Firestore.firestore()
 
@@ -35,32 +59,86 @@ struct AddDriverView: View {
         _email = State(initialValue: user.email)
         _contactNumber = State(initialValue: user.phone)
     }
+    
+    func validateContactNumber(_ input: String) {
+           // Ensure the input only contains numbers and limit the length to 10 digits
+           let numberCharacterSet = CharacterSet.decimalDigits
+           if input.rangeOfCharacter(from: numberCharacterSet.inverted) != nil || input.count > 10 {
+               isInvalidContactNumber = true
+           } else {
+               isInvalidContactNumber = false
+           }
+       }
+    
+    func validateName(_ input: String) {
+          let allowedCharacterSet = CharacterSet.letters.union(CharacterSet.whitespaces)
+          if input.rangeOfCharacter(from: allowedCharacterSet.inverted) != nil {
+              isInvalidName = true
+          } else {
+              isInvalidName = false
+          }
+      }
+    func validateEmail(_ input: String) {
+           let emailRegex = #"^[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"#
+           let predicate = NSPredicate(format: "SELF MATCHES %@", emailRegex)
+           isInvalidEmail = !predicate.evaluate(with: input)
+       }
 
     var body: some View {
         Form {
             Section(header: Text("Name")) {
-                TextField("Enter Name", text: $name)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .disabled(!isEditing)
-            }
+                           TextField("Enter Name", text: $name)
+                               .textFieldStyle(RoundedBorderTextFieldStyle())
+                               .disabled(!isEditing)
+                               .onChange(of: name) { newValue in
+                                   validateName(newValue)
+                               }
+                           
+                           if isInvalidName {
+                               Text("Invalid Name. Only letters and spaces allowed.")
+                                   .foregroundColor(.red)
+                                   .font(.caption)
+                           }
+                       }
 
             Section(header: Text("Email")) {
-                TextField("Enter Email", text: $email)
-                    .disabled(!isEditing)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-            }
+                            TextField("Enter Email", text: $email)
+                                .disabled(!isEditing)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .keyboardType(.emailAddress)
+                                .autocapitalization(.none)
+                                .onChange(of: email) { newValue in
+                                    validateEmail(newValue)
+                                }
+
+                            if isInvalidEmail {
+                                Text("Invalid Email Address")
+                                    .foregroundColor(.red)
+                                    .font(.caption)
+                            }
+                        }
 
             Section(header: Text("Contact Number")) {
-                TextField("Enter Contact Number", text: $contactNumber)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .disabled(!isEditing)
-            }
+                           TextField("Enter Contact Number", text: $contactNumber)
+                               .textFieldStyle(RoundedBorderTextFieldStyle())
+                               .disabled(!isEditing)
+                               .keyboardType(.numberPad)
+                               .onChange(of: contactNumber) { newValue in
+                                   validateContactNumber(newValue)
+                               }
+                           
+                           if isInvalidContactNumber {
+                               Text("Invalid Contact Number")
+                                   .foregroundColor(.red)
+                                   .font(.caption)
+                           }
+                       }
 
-            Section(header: Text("License Number")) {
-                TextField("Enter License Number", text: $licenseNumber)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .disabled(!isEditing)
-            }
+//            Section(header: Text("License Number")) {
+//                TextField("Enter License Number", text: $licenseNumber)
+//                    .textFieldStyle(RoundedBorderTextFieldStyle())
+//                    .disabled(!isEditing)
+//            }
 
             Section(header: Text("License Photo")) {
                 ZStack {
@@ -121,13 +199,18 @@ struct AddDriverView: View {
         }
         .navigationBarTitle("Driver Details", displayMode: .inline)
         .navigationBarItems(
-            trailing: Button(isEditing ? "Done" : "Edit") {
-                if isEditing {
-                    showAlert = true
-                } else {
-                    isEditing = true
-                }
-            }
+                  trailing: Button(isEditing ? "Done" : "Edit") {
+                      if isEditing {
+                          if hasChanges {
+                              showAlert = true
+                          } else {
+                              isEditing = false
+                          }
+                      } else {
+                          isEditing = true
+                          saveInitialValues()
+                      }
+                  }.disabled(isEditing && !hasChanges)
         )
         .alert(isPresented: $showAlert) {
             Alert(
@@ -140,7 +223,18 @@ struct AddDriverView: View {
                 secondaryButton: .cancel(Text("No"))
             )
         }
+        
+      
     }
+    func saveInitialValues() {
+            initialName = name
+            initialEmail = email
+            initialContactNumber = contactNumber
+            initialLicenseNumber = licenseNumber
+            initialVehicle = selectedVehicle
+            initialTerrain = selectedTerrain
+            initialLicenseImage = licenseImage
+        }
 
     /// Updates driver details in Firestore
     private func updateDriverDetails() {

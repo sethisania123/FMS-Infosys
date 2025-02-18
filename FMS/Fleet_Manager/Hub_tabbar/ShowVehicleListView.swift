@@ -140,7 +140,7 @@ struct ShowVehicleListView: View {
                             Image(systemName: "truck.box.fill")
                                 .resizable() // Allows resizing
                                 .scaledToFit() // Ensures it maintains aspect ratio
-                                .frame(width: 20, height: 20) // Sets fixed size
+                                .frame(width: 40, height: 40) // Sets fixed size
 //                                .foregroundColor(.gray)
                                 .padding(.leading, 8)
 
