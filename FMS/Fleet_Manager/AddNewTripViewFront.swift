@@ -221,110 +221,43 @@ struct AddNewTripView: View {
     @State private var deliveryDate: Date = Date()
     @State private var geoAreas = ["Hilly", "Plain"]
     @State private var isLoading = false
-<<<<<<< HEAD
-    
-    var isSaveEnabled: Bool {
-           return !fromLocation.isEmpty &&
-                  !toLocation.isEmpty &&
-                  !selectedGeoArea.isEmpty &&
-                  deliveryDate > Date() // Ensure the date is valid (future date)
-       }
-    
-=======
     @State private var distance: Double = 0.0
     @State private var estimatedTime: Double = 0.0
->>>>>>> 2d138181d9da9293cdb1b532fd6e0cc7beba3e88
     
     let firestoreService = FirestoreService()
     @StateObject private var fromLocationVM = LocationSearchViewModel()
     @StateObject private var toLocationVM = LocationSearchViewModel()
     
+    var isSaveEnabled: Bool {
+           return !fromLocation.isEmpty &&
+                  !toLocation.isEmpty &&
+                  !selectedGeoArea.isEmpty &&
+                  deliveryDate > Date()
+    }
+    
     var body: some View {
-<<<<<<< HEAD
-//        NavigationView {
-            VStack {
-                Form {
-                    Section(header: Text("From")) {
-                        TextField("Enter pickup location", text: $fromLocation)
-                            .padding()
-                            .padding(.leading)
-                            .background(RoundedRectangle(cornerRadius: 8).fill(Color(.white)))
-                            .frame(height : 10)
-                            .overlay(
-                                HStack {
-                                    Image(systemName: "mappin.and.ellipse")
-                                        .foregroundColor(.gray)
-                                    Spacer()
-                                }
-                                .padding(.leading, 8)
-                                
-                            )
-                        
-                    }
-                    .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
-                    
-                    
-                    Section(header : Text("To")){
-                        TextField("Enter destination", text: $toLocation)
-                            .padding()
-                            .padding(.leading)
-                            .background(RoundedRectangle(cornerRadius: 8).fill(Color(.white)))
-                            .frame(height : 10)
-                            .overlay(
-                                HStack {
-                                    Image(systemName: "mappin.and.ellipse")
-                                        .foregroundColor(.gray)
-                                    Spacer()
-                                }
-                                .padding(.leading, 8)
-                            )
-                    }
-                    .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
-                    
-                    Section(header : Text("Terrain Type")) {
-                        Picker(selection: $selectedGeoArea, label: Text(selectedGeoArea)) {
-                            ForEach(geoAreas, id: \.self) { area in
-                                Text(area).tag(area)
-                            }
-                        }
-                        .pickerStyle(MenuPickerStyle())
-                    }
-                    
-                    Section(header: Text("Delivery Date")) {
-                        DatePicker("Select Date", selection: $deliveryDate, in: Date()..., displayedComponents: .date)
-                    }
-                }
-                VStack{
-                    
-                    if isLoading {
-                        ProgressView()
-                    } else {
-                        Button(action: createTrip) {
-                            Text("Create Trip")
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .foregroundColor(.white)
-                                .background(Color.blue)
-                                .cornerRadius(17)
-                        }
-                        .padding()
-                        .disabled(!isSaveEnabled)
-                        .opacity((!isSaveEnabled) ? 0.5 : 1)
-=======
         VStack {
             Form {
                 Section(header: Text("From")) {
-                    LocationInputField(text: $fromLocation, searchViewModel: fromLocationVM, placeholder: "Enter pickup location")
-                        .padding()
+                    LocationInputField(
+                        text: $fromLocation, searchViewModel: fromLocationVM, placeholder: "Enter pickup location"
+                    ) .font(.system(size: 12))
+                        .frame(height: 46)
+                        .padding(.vertical, -2)
+//                        .padding()
                         .background(RoundedRectangle(cornerRadius: 8).fill(Color.white))
-                        .overlay(HStack { Image(systemName: "mappin.and.ellipse").foregroundColor(.gray); Spacer() }.padding(.leading, 8))
+                        .overlay(HStack { Image(systemName: "mappin.and.ellipse").foregroundColor(.gray); Spacer() }
+                            .padding(.leading, -10))
                 }
                 
                 Section(header: Text("To")) {
                     LocationInputField(text: $toLocation, searchViewModel: toLocationVM, placeholder: "Enter destination")
-                        .padding()
+                        .font(.system(size: 12))
+                            .frame(height: 46)
+                            .padding(.vertical, -2)
+//                        .padding()
                         .background(RoundedRectangle(cornerRadius: 8).fill(Color.white))
-                        .overlay(HStack { Image(systemName: "mappin.and.ellipse").foregroundColor(.gray); Spacer() }.padding(.leading, 8))
+                        .overlay(HStack { Image(systemName: "mappin.and.ellipse").foregroundColor(.gray); Spacer() }.padding(.leading, -10))
                 }
                 
                 Section(header: Text("Terrain Type")) {
@@ -332,13 +265,12 @@ struct AddNewTripView: View {
                         ForEach(geoAreas, id: \ .self) { area in
                             Text(area).tag(area)
                         }
->>>>>>> 2d138181d9da9293cdb1b532fd6e0cc7beba3e88
                     }
                     .pickerStyle(MenuPickerStyle())
                 }
                 
                 Section(header: Text("Delivery Date")) {
-                    DatePicker("Select Date", selection: $deliveryDate, displayedComponents: .date)
+                    DatePicker("Select Date", selection: $deliveryDate, in: Date()..., displayedComponents: .date)
                 }
                 
                 Section(header: Text("Distance & Time")) {
@@ -347,7 +279,8 @@ struct AddNewTripView: View {
                 }
             }
             
-            VStack {
+            VStack{
+                
                 if isLoading {
                     ProgressView()
                 } else {
@@ -360,6 +293,8 @@ struct AddNewTripView: View {
                             .cornerRadius(17)
                     }
                     .padding()
+                    .disabled(!isSaveEnabled)
+                    .opacity((!isSaveEnabled) ? 0.5 : 1)
                 }
             }
             Spacer()
@@ -441,10 +376,6 @@ struct AddNewTripView: View {
 }
 
 
-<<<<<<< HEAD
-
-
-
 //struct TripListView: View {
 //    @State private var trips: [Trip] = []
 //    private let db = Firestore.firestore()
@@ -474,37 +405,6 @@ struct AddNewTripView: View {
 //        }
 //    }
 //}
-=======
-struct TripListView: View {
-    @State private var trips: [Trip] = []
-    private let db = Firestore.firestore()
-    
-    var body: some View {
-        List(trips, id: \.id) { trip in
-            VStack(alignment: .leading) {
-                Text("From: \(trip.startLocation) → To: \(trip.endLocation)")
-                    .font(.headline)
-                Text("Status: \(trip.TripStatus.rawValue)")
-                    .font(.subheadline)
-            }
-        }
-        .onAppear(perform: fetchTrips)
-        .navigationTitle("Trips")
-    }
-    
-    private func fetchTrips() {
-        db.collection("trips").getDocuments { snapshot, error in
-            guard let documents = snapshot?.documents, error == nil else {
-                print("Error fetching trips: \(error?.localizedDescription ?? "Unknown error")")
-                return
-            }
-            self.trips = documents.compactMap { doc in
-                try? doc.data(as: Trip.self)
-            }
-        }
-    }
-}
->>>>>>> 2d138181d9da9293cdb1b532fd6e0cc7beba3e88
 
 struct TripListView_Previews: PreviewProvider {
     static var previews: some View {
