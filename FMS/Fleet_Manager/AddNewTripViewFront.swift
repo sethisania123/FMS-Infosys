@@ -182,9 +182,7 @@
 //
 
 
-
 import SwiftUI
-
 import FirebaseFirestore
 import MapKit
 
@@ -193,8 +191,6 @@ struct AlertMessage: Identifiable {
     let title: String
     let message: String
 }
-
-
 
 class FirestoreService {
     private let db = Firestore.firestore()
@@ -216,9 +212,7 @@ class FirestoreService {
     }
 }
 
-
 struct AddNewTripView: View {
-    
     @State private var showSuccessAlert = false
     @State private var alertMessage: AlertMessage?
     @State private var fromLocation: String = ""
@@ -235,72 +229,63 @@ struct AddNewTripView: View {
     @StateObject private var toLocationVM = LocationSearchViewModel()
     
     var body: some View {
-//        NavigationView {
-            VStack {
-                Form {
-                    Section(header: Text("From")) {
-                        LocationInputField(text: $fromLocation, searchViewModel: fromLocationVM, placeholder: "Enter pickup location")
-                            .padding()
-                            .background(RoundedRectangle(cornerRadius: 8).fill(Color.white))
-                            .overlay(HStack { Image(systemName: "mappin.and.ellipse").foregroundColor(.gray); Spacer() }.padding(.leading, 8))
-                    }
-                    
-                    Section(header: Text("To")) {
-                        LocationInputField(text: $toLocation, searchViewModel: toLocationVM, placeholder: "Enter destination")
-                            .padding()
-                            .background(RoundedRectangle(cornerRadius: 8).fill(Color.white))
-                            .overlay(HStack { Image(systemName: "mappin.and.ellipse").foregroundColor(.gray); Spacer() }.padding(.leading, 8))
-                    }
-                    
-                    Section(header: Text("Terrain Type")) {
-                        Picker(selection: $selectedGeoArea, label: Text(selectedGeoArea)) {
-                            ForEach(geoAreas, id: \.self) { area in
-                                Text(area).tag(area)
-                            }
-                        }
-                        .pickerStyle(MenuPickerStyle())
-                    }
-                    
-                    Section(header: Text("Delivery Date")) {
-                        DatePicker("Select Date", selection: $deliveryDate, displayedComponents: .date)
-                    }
-                    
-                    Section(header: Text("Distance & Time")) {
-                        Text("Distance: \(distance, specifier: "%.2f") km")
-                        Text("Estimated Time: \(estimatedTime, specifier: "%.1f") days")
-                    }
+        VStack {
+            Form {
+                Section(header: Text("From")) {
+                    LocationInputField(text: $fromLocation, searchViewModel: fromLocationVM, placeholder: "Enter pickup location")
+                        .padding()
+                        .background(RoundedRectangle(cornerRadius: 8).fill(Color.white))
+                        .overlay(HStack { Image(systemName: "mappin.and.ellipse").foregroundColor(.gray); Spacer() }.padding(.leading, 8))
                 }
                 
-                VStack {
-                    if isLoading {
-                        ProgressView()
-                    } else {
-                        Button(action: createTrip) {
-                            Text("Create Trip")
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .foregroundColor(.white)
-                                .background(Color.blue)
-                                .cornerRadius(17)
-                        }
+                Section(header: Text("To")) {
+                    LocationInputField(text: $toLocation, searchViewModel: toLocationVM, placeholder: "Enter destination")
                         .padding()
-                    }
+                        .background(RoundedRectangle(cornerRadius: 8).fill(Color.white))
+                        .overlay(HStack { Image(systemName: "mappin.and.ellipse").foregroundColor(.gray); Spacer() }.padding(.leading, 8))
                 }
-                Spacer()
+                
+                Section(header: Text("Terrain Type")) {
+                    Picker(selection: $selectedGeoArea, label: Text(selectedGeoArea)) {
+                        ForEach(geoAreas, id: \ .self) { area in
+                            Text(area).tag(area)
+                        }
+                    }
+                    .pickerStyle(MenuPickerStyle())
+                }
+                
+                Section(header: Text("Delivery Date")) {
+                    DatePicker("Select Date", selection: $deliveryDate, displayedComponents: .date)
+                }
+                
+                Section(header: Text("Distance & Time")) {
+                    Text("Distance: \(distance, specifier: "%.2f") km")
+                    Text("Estimated Time: \(estimatedTime, specifier: "%.1f") days")
+                }
             }
-            .background(Color(.systemGray6))
-            .alert(item: $alertMessage) { alert in
-                Alert(title: Text(alert.title), message: Text(alert.message), dismissButton: .default(Text("OK")))
-            }
-            .navigationBarTitle("Add New Trip", displayMode: .inline)
-<<<<<<< HEAD
-        }
-=======
-//            .navigationBarItems(leading: Button("Back"){})
             
-//        }
-
->>>>>>> 41d0dea3b47e2e4e033777cf53cd79e5f8069ff9
+            VStack {
+                if isLoading {
+                    ProgressView()
+                } else {
+                    Button(action: createTrip) {
+                        Text("Create Trip")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .foregroundColor(.white)
+                            .background(Color.blue)
+                            .cornerRadius(17)
+                    }
+                    .padding()
+                }
+            }
+            Spacer()
+        }
+        .background(Color(.systemGray6))
+        .alert(item: $alertMessage) { alert in
+            Alert(title: Text(alert.title), message: Text(alert.message), dismissButton: .default(Text("OK")))
+        }
+        .navigationBarTitle("Add New Trip", displayMode: .inline)
     }
     
     private func createTrip() {
@@ -371,7 +356,6 @@ struct AddNewTripView: View {
         }
     }
 }
-
 
 
 struct TripListView: View {
