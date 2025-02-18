@@ -235,7 +235,7 @@ struct AddNewTripView: View {
     @StateObject private var toLocationVM = LocationSearchViewModel()
     
     var body: some View {
-        NavigationView {
+//        NavigationView {
             VStack {
                 Form {
                     Section(header: Text("From")) {
@@ -293,7 +293,14 @@ struct AddNewTripView: View {
                 Alert(title: Text(alert.title), message: Text(alert.message), dismissButton: .default(Text("OK")))
             }
             .navigationBarTitle("Add New Trip", displayMode: .inline)
+<<<<<<< HEAD
         }
+=======
+//            .navigationBarItems(leading: Button("Back"){})
+            
+//        }
+
+>>>>>>> 41d0dea3b47e2e4e033777cf53cd79e5f8069ff9
     }
     
     private func createTrip() {
