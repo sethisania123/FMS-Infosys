@@ -7,10 +7,6 @@
 import SwiftUI
 import FirebaseFirestore
 
-<<<<<<< HEAD
-=======
-// MARK: - Example Data
->>>>>>> 196cdfc8a37e24eb981a2bfec9d01c802c353df4
 func generateExampleTrips() -> [Trip] {
     let driver1 = Driver(name: "John Doe", email: "john@example.com", phone: "123-456-7890", experience: .moreThanFive, license: "D12345", geoPreference: .plain, vehiclePreference: .truck, status: true)
 
@@ -60,8 +56,7 @@ struct FleetControlDashboard: View {
 struct DashboardView: View {
     var trips = generateExampleTrips()
     
-<<<<<<< HEAD
-=======
+
     // Counts fetched from Firestore
     @State var driverCount: Int = 0
     @State var vehicleCount: Int = 0
@@ -71,7 +66,7 @@ struct DashboardView: View {
     
     let db = Firestore.firestore()
     
->>>>>>> 196cdfc8a37e24eb981a2bfec9d01c802c353df4
+
     var body: some View {
         NavigationView {
             ScrollView {
