@@ -210,6 +210,48 @@ class FirestoreService {
             completion(.failure(error))
         }
     }
+     
+    func assignDriver(to trip: Trip, driver: Driver) { // assign driver function
+        let tripRef = Firestore.firestore().collection("trips").document(trip.id!)
+        let driverRef = Firestore.firestore().collection("drivers").document(driver.id!)
+
+        trip.assignedDriver = driver
+        driver.status = false
+        driver.upcomingTrip = trip
+
+        let batch = Firestore.firestore().batch()
+        batch.updateData(["assignedDriver": driver.id!], forDocument: tripRef)
+        batch.updateData(["status": false, "upcomingTrip": trip.id!], forDocument: driverRef)
+
+        batch.commit { error in
+            if let error = error {
+                print("Error assigning driver: \(error.localizedDescription)")
+            } else {
+                print("Driver assigned successfully")
+            }
+        }
+    }
+    
+    func assignVehicle(to trip: Trip, vehicle: Vehicle) { // assign vehicle function
+        let tripRef = Firestore.firestore().collection("trips").document(trip.id!)
+        let vehicleRef = Firestore.firestore().collection("vehicles").document(vehicle.id!)
+
+        trip.assignedVehicle = vehicle
+        vehicle.status = false // Mark the vehicle as unavailable
+
+        let batch = Firestore.firestore().batch()
+        batch.updateData(["assignedVehicle": vehicle.id!], forDocument: tripRef)
+        batch.updateData(["status": false, "currentTrip": trip.id!], forDocument: vehicleRef)
+
+        batch.commit { error in
+            if let error = error {
+                print("Error assigning vehicle: \(error.localizedDescription)")
+            } else {
+                print("Vehicle assigned successfully")
+            }
+        }
+    }
+
 }
 
 struct AddNewTripView: View {
@@ -225,6 +267,7 @@ struct AddNewTripView: View {
     @State private var estimatedTime: Double = 0.0
     
     let firestoreService = FirestoreService()
+    
     @StateObject private var fromLocationVM = LocationSearchViewModel()
     @StateObject private var toLocationVM = LocationSearchViewModel()
     
@@ -326,7 +369,8 @@ struct AddNewTripView: View {
                     distance: Float(self.distance),
                     estimatedTime: Float(self.estimatedTime),
                     assignedDriver: nil,
-                    TripStatus: .scheduled
+                    TripStatus: .scheduled,
+                    assignedVehicle: nil
                 )
                 
                 firestoreService.addTrip(trip: newTrip) { result in

@@ -6,12 +6,12 @@
 //
 import SwiftUI
 
-
 func generateExampleTrips() -> [Trip] {
     let driver1 = Driver(name: "John Doe", email: "john@example.com", phone: "123-456-7890", experience: .moreThanFive, license: "D12345", geoPreference: .plain, vehiclePreference: .truck, status: true)
 
     let driver2 = Driver(name: "Alice Smith", email: "alice@example.com", phone: "987-654-3210", experience: .lessThanFive, license: "A67890", geoPreference: .hilly, vehiclePreference: .van, status: true)
-
+    
+    let vehicle1 = Vehicle(type: .car, model: "", registrationNumber: "", fuelType: .diesel, mileage: 1, rc: "", vehicleImage: "", insurance: "", pollution: "", status: false)
     let dateFormatter = DateFormatter()
     dateFormatter.dateFormat = "yyyy/MM/dd"
 
@@ -19,11 +19,11 @@ func generateExampleTrips() -> [Trip] {
     let trip2Date = dateFormatter.date(from: "2025/02/05")!
     let trip3Date = dateFormatter.date(from: "2025/02/10")!
 
-    let trip1 = Trip(tripDate: trip1Date, startLocation: "New York", endLocation: "Los Angeles", distance: 2800.0, estimatedTime: 45.0, assignedDriver: driver1, TripStatus: .scheduled)
+    let trip1 = Trip(tripDate: trip1Date, startLocation: "New York", endLocation: "Los Angeles", distance: 2800.0, estimatedTime: 45.0, assignedDriver: driver1, TripStatus: .scheduled,assignedVehicle: vehicle1)
 
-    let trip2 = Trip(tripDate: trip2Date, startLocation: "San Francisco", endLocation: "Chicago", distance: 2130.0, estimatedTime: 30.0, assignedDriver: driver2, TripStatus: .inprogress)
+    let trip2 = Trip(tripDate: trip2Date, startLocation: "San Francisco", endLocation: "Chicago", distance: 2130.0, estimatedTime: 30.0, assignedDriver: driver2, TripStatus: .inprogress, assignedVehicle: vehicle1)
 
-    let trip3 = Trip(tripDate: trip3Date, startLocation: "Boston", endLocation: "Miami", distance: 1500.0, estimatedTime: 18.0, assignedDriver: driver1, TripStatus: .completed)
+    let trip3 = Trip(tripDate: trip3Date, startLocation: "Boston", endLocation: "Miami", distance: 1500.0, estimatedTime: 18.0, assignedDriver: driver1, TripStatus: .completed, assignedVehicle: vehicle1)
 
     return [trip1, trip2, trip3]
 }
@@ -56,7 +56,7 @@ struct FleetControlDashboard: View {
 
 struct DashboardView: View {
     var trips = generateExampleTrips()
-
+    
     var body: some View {
         NavigationView {
             ScrollView {
