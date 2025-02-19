@@ -76,6 +76,7 @@ class Driver: User {
     var geoPreference: GeoPreference
     var vehiclePreference: VehicleType
     var status: Bool
+    var upcomingTrip: Trip?
 
     init(name: String, email: String, phone: String, experience: Experience, license: String, geoPreference: GeoPreference, vehiclePreference: VehicleType, status: Bool) {
         self.experience = experience
@@ -83,6 +84,7 @@ class Driver: User {
         self.geoPreference = geoPreference
         self.vehiclePreference = vehiclePreference
         self.status = status
+        self.upcomingTrip = nil
         super.init(name: name, email: email, phone: phone, role: .driver)
     }
     
