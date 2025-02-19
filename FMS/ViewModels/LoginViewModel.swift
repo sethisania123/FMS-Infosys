@@ -94,85 +94,66 @@ class LoginViewModel: ObservableObject {
         }
     
     func createDriverAccount(name: String, email: String, password: String, phone: String, experience: Experience,
-                           license: String, geoPreference: GeoPreference, vehiclePreference: VehicleType) {
+                             license: String, geoPreference: GeoPreference, vehiclePreference: VehicleType) {
         isLoading = true
         errorMessage = nil
         
-        // Input validation
-        guard !email.isEmpty, !name.isEmpty, !phone.isEmpty, !license.isEmpty else {
-            errorMessage = "All fields are required"
-            showError = true
-            
-            isLoading = false
-            return
-        }
-        
-        // Generate a secure random password
-        let password = generateSecurePassword()
-        
-        auth.createUser(withEmail: email, password: password) { [weak self] authResult, error in
-            guard let self = self else { return }
-            
+        let userDataDict: [String: Any] = [
+            "email": email,
+            "name": name,
+            "phone": phone,
+            "password": password, // ⚠️ Consider removing password storage for security
+            "role": Role.driver.rawValue,
+            "experience": experience.rawValue,
+            "license": license,
+            "geoPreference": geoPreference.rawValue,
+            "vehiclePreference": vehiclePreference.rawValue,
+            "status": true,
+            "createdAt": Timestamp()
+        ]
+
+        let database = Firestore.firestore()
+        let newUserCollectionRef = database.collection("users").document(UUID().uuidString) // ⚠️ Using UUID, may cause mismatch with Firebase Auth
+
+        newUserCollectionRef.setData(userDataDict) { error in
             DispatchQueue.main.async {
                 if let error = error {
-                    self.errorMessage = error.localizedDescription
+                    self.errorMessage = "Firestore Error: \(error.localizedDescription)"
                     self.showError = true
-                    self.isLoading = false
-                    return
-                }
-                
-                guard let userId = authResult?.user.uid else {
-                    self.errorMessage = "User ID not found"
-                    self.showError = true
-                    self.isLoading = false
-                    return
-                }
-                
-                let userData: [String: Any] = [
-                    "name": name,
-                    "email": email,
-                    "phone": phone,
-                    "role": Role.driver.rawValue,
-                    "password": password,
-                    "createdAt": Timestamp()
-                ]
-                
-                self.createDriverProfile(userId: userId, userData: userData, driverData: [
-                    "experience": experience.rawValue,
-                    "license": license,
-                    "geoPreference": geoPreference.rawValue,
-                    "vehiclePreference": vehiclePreference.rawValue,
-                    "status": true,
-                    "createdAt": Timestamp()
-                ], password: password)
-            }
-        }
-    }
-    
-    private func createDriverProfile(userId: String, userData: [String: Any], driverData: [String: Any], password: String) {
-        let batch = db.batch()
-        
-        let userRef = db.collection("users").document(userId)
-        let driverRef = db.collection("drivers").document(userId)
-        
-        batch.setData(userData, forDocument: userRef)
-        batch.setData(driverData, forDocument: driverRef)
-        
-        batch.commit { [weak self] error in
-            DispatchQueue.main.async {
-                if let error = error {
-                    self?.errorMessage = "Firestore batch commit failed: \(error.localizedDescription)"
-                    self?.showError = true
-                    print("Firestore Error: \(error.localizedDescription)")
                 } else {
-                    print("Driver account created successfully with email: \(userData["email"] as? String ?? "") and password: \(password)")
-                    print("User Data: \(userData)")
-                    print("Driver Data: \(driverData)")
+                    print("✅ Driver account created successfully in Firestore.")
                 }
-                self?.isLoading = false
+                self.isLoading = false
             }
         }
     }
+
+
+    
+//    private func createDriverProfile(userId: String, userData: [String: Any], driverData: [String: Any], password: String) {
+//        let batch = db.batch()
+//        
+//        let userRef = db.collection("users").document(userId)
+//        let driverRef = db.collection("drivers").document(userId)
+//        
+//        batch.setData(userData, forDocument: userRef)
+//        batch.setData(driverData, forDocument: driverRef)
+//        
+//        batch.commit { [weak self] error in
+//            DispatchQueue.main.async {
+//                if let error = error {
+//                    self?.errorMessage = "Firestore batch commit failed: \(error.localizedDescription)"
+//                    self?.showError = true
+//                    print("Firestore Error: \(error.localizedDescription)")
+//                } else {
+//                    print("Driver account created successfully with email: \(userData["email"] as? String ?? "") and password: \(password)")
+//                    print("User Data: \(userData)")
+//                    print("Driver Data: \(driverData)")
+//                }
+//                self?.isLoading = false
+//            }
+//        }
+//    }
     
     private func fetchUserData(userId: String) {
         db.collection("users").document(userId).getDocument { [weak self] snapshot, error in

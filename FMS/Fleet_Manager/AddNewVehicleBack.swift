@@ -11,6 +11,20 @@ import Firebase
 import FirebaseFirestore
 import Cloudinary
 
+struct CloudinaryConfig {
+    static let cloudName = "dztmc60fg"
+    static let uploadPreset = "FMS-iNFOSYS"
+    static let apiKey = "489983833873463"
+}
+
+struct CloudinaryResponse: Codable {
+    let secureUrl: String
+    
+    enum CodingKeys: String, CodingKey {
+        case secureUrl = "secure_url"
+    }
+}
+
 struct DocumentUploadButton: View {
     let title: String
     @Binding var selectedImage: UIImage?
@@ -305,14 +319,15 @@ struct AddNewVehicle: View {
             }
         }
     }
-
+    
     func uploadImageToCloud(_ image: UIImage?, completion: @escaping (String?) -> Void) {
         guard let image = image, let imageData = image.jpegData(compressionQuality: 0.8) else {
+            print("⚠️ Failed to prepare image data")
             completion(nil)
             return
         }
 
-        let url = URL(string: "https://api.cloudinary.com/v1_1/YOUR_CLOUD_NAME/image/upload")!
+        let url = URL(string: "https://api.cloudinary.com/v1_1/\(CloudinaryConfig.cloudName)/image/upload")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
 
@@ -329,29 +344,62 @@ struct AddNewVehicle: View {
         body.append(imageData)
         body.append("\r\n".data(using: .utf8)!)
         
-        // Append upload preset (if required)
+        // Append upload preset
         body.append("--\(boundary)\r\n".data(using: .utf8)!)
         body.append("Content-Disposition: form-data; name=\"upload_preset\"\r\n\r\n".data(using: .utf8)!)
-        body.append("YOUR_UPLOAD_PRESET\r\n".data(using: .utf8)!)
+        body.append("\(CloudinaryConfig.uploadPreset)\r\n".data(using: .utf8)!)
         
         body.append("--\(boundary)--\r\n".data(using: .utf8)!)
         request.httpBody = body
+        print("Starting image upload, size: \(imageData.count) bytes")
 
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
-                print("Upload failed: \(error)")
-                completion(nil)
-                return
+                print("⚠️ Upload network error: \(error)")
+                DispatchQueue.main.async {
+                                completion(nil)
+                            }
+                            return
             }
+            
+            if let httpResponse = response as? HTTPURLResponse {
+                        print("Upload HTTP status: \(httpResponse.statusCode)")
+                        
+                        if httpResponse.statusCode != 200 {
+                            if let data = data, let errorStr = String(data: data, encoding: .utf8) {
+                                print("⚠️ Cloudinary error response: \(errorStr)")
+                            }
+                            DispatchQueue.main.async {
+                                completion(nil)
+                            }
+                            return
+                        }
+                    }
 
-            if let data = data, let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
-                completion(json["secure_url"] as? String)
-            } else {
-                completion(nil)
-            }
-        }.resume()
+            if let data = data {
+                        do {
+                            let json = try JSONDecoder().decode(CloudinaryResponse.self, from: data)
+                            print("Successfully parsed Cloudinary response with URL: \(json.secureUrl)")
+                            DispatchQueue.main.async {
+                                completion(json.secureUrl)
+                            }
+                        } catch {
+                            print("⚠️ Failed to decode Cloudinary response: \(error)")
+                            if let responseString = String(data: data, encoding: .utf8) {
+                                print("Raw response: \(responseString)")
+                            }
+                            DispatchQueue.main.async {
+                                completion(nil)
+                            }
+                        }
+                    } else {
+                        print("⚠️ No data received from Cloudinary")
+                        DispatchQueue.main.async {
+                            completion(nil)
+                        }
+                    }
+                }.resume()
     }
-
 }
 
 struct VehicleFormField: View {
@@ -371,6 +419,7 @@ struct VehicleFormField: View {
         }
     }
 }
+
 struct FuelTypeSelector: View {
     @Binding var fuelType: String
     
