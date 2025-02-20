@@ -9,6 +9,23 @@ import SwiftUI
 import Cloudinary
 import SwiftSMTP
 
+struct FMSCloudinaryConfig {
+    static let cloudName = "dztmc60fg"
+    static let uploadPreset = "FMS-iNFOSYS"
+    static let apiKey = "489983833873463"
+}
+
+struct FMSCloudinaryResponse: Codable {
+    let secureUrl: String
+    
+    enum CodingKeys: String, CodingKey {
+        case secureUrl = "secure_url"
+    }
+}
+
+let config = CLDConfiguration(cloudName: FMSCloudinaryConfig.cloudName, apiKey: FMSCloudinaryConfig.apiKey)
+let cloudinary = CLDCloudinary(configuration: config)
+
 func sendEmail(to email: String, password: String, completion: @escaping (Bool, String) -> Void) {
     let smtp = SMTP(
         hostname: "smtp.gmail.com",  // Change this for Outlook, Yahoo, etc.
@@ -76,7 +93,6 @@ struct AddUserView: View {
   
     let roles = ["Fleet Manager", "Driver", "Maintenance"]
     
-    let cloudinary = CLDCloudinary(configuration: CLDConfiguration(cloudName: "dztmc60fg", apiKey: "489983833873463", apiSecret: "UN-I5BTJCTmvx-yGsyMo9i-kpr4"))
     
     var experiencePicker: some View {
         Menu {
@@ -525,7 +541,7 @@ struct AddUserView: View {
         }
         
         isLoading = true
-        let loginModel_t = LoginViewModel()
+//        let loginModel_t = LoginViewModel()
         generatedPassword = generateSecurePassword()
         
         // Create account
@@ -534,7 +550,7 @@ struct AddUserView: View {
             let loginModel_t = LoginViewModel()
             loginModel_t.createDriverAccount(
                 name: self.name,
-                email: self.email,
+                email: self.email, 
                 password: generatedPassword,
                 phone: contactNumber,
                 experience: selectedExperience,
@@ -578,17 +594,12 @@ struct AddUserView: View {
         
         isLoading = true
         
-        let uploadParams = CLDUploadRequestParams()
-            .setPublicId("license_photo_\(UUID().uuidString)")
-            .setFolder("fms/")
-            .setResourceType(.image)
-        
-        cloudinary.createUploader().upload(data: image.jpegData(compressionQuality: 0.8)!, uploadPreset: "FMS-iNFOSYS", params: uploadParams, completionHandler:  { (result, error) in
+        cloudinary.createUploader().upload(data: image.jpegData(compressionQuality: 0.8)!, uploadPreset: "FMS-iNFOSYS", completionHandler:  { (result, error) in
             if let error = error {
                 print("❌ Error uploading photo: \(error.localizedDescription)")
                 alertMessage = "Failed to upload photo"
                 showingAlert = true
-            } else if let result = result {
+            } else if let _ = result {
                 print("✅ Photo uploaded successfully")
                 alertMessage = "Photo uploaded successfully!"
                 showingAlert = true
